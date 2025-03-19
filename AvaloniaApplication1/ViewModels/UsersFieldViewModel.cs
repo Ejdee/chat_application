@@ -1,12 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using ReactiveUI;
 
 namespace AvaloniaApplication1.ViewModels;
 
 public class UsersFieldViewModel : ViewModelBase
 {
     public ObservableCollection<UserViewModel> Users { get; }
+    private UserViewModel? _selectedUser;
 
     public UsersFieldViewModel()
     {
@@ -19,6 +21,31 @@ public class UsersFieldViewModel : ViewModelBase
             new UserViewModel { Name = "Mike Wilson", IsActive = false },
             new UserViewModel { Name = "Adam Baker", IsActive = true }
         };
+    }
+
+    public UserViewModel? SelectedUser
+    {
+        get => _selectedUser;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _selectedUser, value);
+            if (_selectedUser != null)
+            {
+                OpenChat(_selectedUser);
+            }
+        }
+    }
+
+    private void OpenChat(UserViewModel user)
+    {
+        Console.WriteLine("Opening the chat with: " + user.Name);        
+    }
+    
+    public void OpenChatRandom()
+    {
+        var random = new Random();
+        var index = random.Next(Users.Count);
+        OpenChat(Users[index]);
     }
 }
 

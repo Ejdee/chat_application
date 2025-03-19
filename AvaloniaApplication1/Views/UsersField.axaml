@@ -17,10 +17,15 @@
                  HorizontalAlignment="Center"
                  DockPanel.Dock="Top"
                  Margin="0,10,0,20"/>
+      <Button 
+        DockPanel.Dock="Bottom"
+        HorizontalAlignment="Center"
+        Margin="0,20,0,0"
+        Command="{Binding OpenChatRandom}">Pick a Random</Button>
 
       <ScrollViewer MaxHeight="350" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <ItemsControl ItemsSource="{Binding Users}">
-          <ItemsControl.ItemTemplate>
+        <ListBox ItemsSource="{Binding Users}" SelectedItem="{Binding SelectedUser, Mode=TwoWay}">
+          <ListBox.ItemTemplate>
             <DataTemplate DataType="vm:UserViewModel">
               <Border Margin="5"
                       Padding="10"
@@ -54,8 +59,8 @@
                 </Grid>
               </Border>
             </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+          </ListBox.ItemTemplate>
+        </ListBox>
       </ScrollViewer>
     </DockPanel>
   </Border>
