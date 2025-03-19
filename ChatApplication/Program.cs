@@ -1,4 +1,5 @@
-﻿using Firebase.Database;
+﻿using Avalonia;
+using Firebase.Database;
 using FirebaseAdmin;
 using Google.Apis.Auth.OAuth2;
 using Google.Cloud.Firestore;
@@ -14,17 +15,25 @@ namespace ChatApplication
             
             Console.WriteLine("Connected to Firestore.");
 
-            Console.WriteLine("Enter your username: ");
-            var username = Console.ReadLine();
-            if (username == null) return;
             
-            CollectionReference messages = db.Collection("messages");
+             
+            
+            //Console.WriteLine("Enter your username: ");
+            //var username = Console.ReadLine();
+            //if (username == null) return;
+            
+            //CollectionReference messages = db.Collection("messages");
 
-            _ = Task.Run(() => ListenToMessages(db, username, messages));
+            //_ = Task.Run(() => ListenToMessages(db, username, messages));
             
-            await StartSendingMessages(db, username, messages);
+            //await StartSendingMessages(db, username, messages);
             
         }
+
+        public static AppBuilder BuildApp() => AppBuilder.Configure<App>()
+            .UsePlatformDetect()
+            .LogToTrace()
+            .
 
         static void ListenToMessages(FirestoreDb db, string username, CollectionReference messages)
         {

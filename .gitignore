@@ -55,3 +55,22 @@ nunit-*.xml
 
 .idea/
 firebase_api.json
+
+# JetBrains Rider
+*.sln.iml
+*.DotSettings.user
+.config/JetBrains/
+**/resharper-host/DecompilerCache/
+**/resharper-host/SourcesCache/
+
+# Visual Studio / Rider files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+**/packages/*
+!**/packages/build/
+*.nuget.props
+*.nuget.targets
