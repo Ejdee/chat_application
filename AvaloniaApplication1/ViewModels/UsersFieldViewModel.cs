@@ -10,9 +10,11 @@ public class UsersFieldViewModel : ViewModelBase
 {
     public ObservableCollection<UserViewModel> Users { get; }
     private UserViewModel? _selectedUser;
+    private readonly MainWindowViewModel _mainWindowViewModel;
 
-    public UsersFieldViewModel()
+    public UsersFieldViewModel(MainWindowViewModel mainWindowViewModel)
     {
+        _mainWindowViewModel = mainWindowViewModel;
         Users = new ObservableCollection<UserViewModel>
         {
             new UserViewModel { Name = "John Doe", IsActive = true },
@@ -40,7 +42,7 @@ public class UsersFieldViewModel : ViewModelBase
     private void OpenChat(UserViewModel user)
     {
         Console.WriteLine("Opening the chat with: " + user.Name);
-       // _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
+        _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
     }
     
     public void OpenChatRandom()
@@ -53,7 +55,7 @@ public class UsersFieldViewModel : ViewModelBase
 
 public class UserViewModel : ViewModelBase
 {
-    private string _name;
+    private string? _name;
     
     // List of colors to use for user avatars
     private static readonly List<string> Colors = new()
@@ -64,17 +66,17 @@ public class UserViewModel : ViewModelBase
 
     private Random _random = new();
     
-    public string Name
+    public string? Name
     {
         get => _name;
-        set => SetProperty(ref _name, value);
+        set => this.RaiseAndSetIfChanged(ref _name, value);
     }
 
     private bool _isActive;
     public bool IsActive
     {
         get => _isActive;
-        set => SetProperty(ref _isActive, value);
+        set => this.RaiseAndSetIfChanged(ref _isActive, value);
     }
 
     public string Status => IsActive ? "Active" : "Offline";

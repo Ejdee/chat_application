@@ -9,7 +9,6 @@ public partial class UsersField : UserControl
     public UsersField()
     {
         InitializeComponent();
-        DataContext = new UsersFieldViewModel();
     }
 
     private void InitializeComponent()

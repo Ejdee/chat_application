@@ -1,32 +1,28 @@
-﻿using AvaloniaApplication1.Views;
+﻿using System;
+using AvaloniaApplication1.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ReactiveUI;
 
 namespace AvaloniaApplication1.ViewModels;
 
-public partial class MainWindowViewModel : ViewModelBase
+public class MainWindowViewModel : ViewModelBase
 {
-    private ViewModelBase _currentChat;
-    private UserViewModel? _selectedUser;
-
-    public UserViewModel? SelectedUser
-    {
-        get => _selectedUser;
-        set => this.RaiseAndSetIfChanged(ref _selectedUser, value);
-    }
+    private ChatViewModel? _currentChat;
+    public UsersFieldViewModel UsersField { get; }
     
-    public ViewModelBase CurrentChat
+    public ChatViewModel? CurrentChat
     {
         get => _currentChat;
-        set => this.RaiseAndSetIfChanged(ref _currentChat, value);
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _currentChat, value); 
+            Console.WriteLine("CurrentChat changed to " + value);
+        }
     }
-    
-    private readonly ChatViewModel _chatPage = new ChatViewModel("Adam");
 
     public MainWindowViewModel()
     {
-        CurrentChat = _chatPage;
+        UsersField = new UsersFieldViewModel(this);
+        CurrentChat = new ChatViewModel("Adam");
     }
-    
-    
 }

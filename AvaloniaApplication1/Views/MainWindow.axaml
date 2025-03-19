@@ -16,7 +16,7 @@
              to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
         <vm:MainWindowViewModel/>
     </Design.DataContext>
-
+    
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto" />
@@ -25,7 +25,8 @@
 
         <!-- User Sidebar on the left -->
         <views:UsersField Grid.Column="0"
-                          VerticalAlignment="Stretch"/>
+                          VerticalAlignment="Stretch"
+                          DataContext="{Binding UsersField}"/>
 
         <!-- Chat view will be displayed in this area -->
         <ContentControl Grid.Column="1" Content="{Binding CurrentChat}"/>

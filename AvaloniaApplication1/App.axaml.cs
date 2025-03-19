@@ -14,7 +14,6 @@ namespace AvaloniaApplication1;
 
 public partial class App : Application
 {
-    private IServiceProvider _serviceProvider;
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);

@@ -1,27 +1,22 @@
 using System;
-using System.Linq;
-using System.Net.Mime;
 using System.Windows.Input;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using AvaloniaApplication1.Views;
 using ReactiveUI;
 
 namespace AvaloniaApplication1.ViewModels;
 
 public class ChatViewModel : ViewModelBase
 {
-     public ICommand BackToMainView { get;  }
-     public string Username { get; }
+     private string? _username;
 
-     public ChatViewModel(string username)
+     public string? Username
      {
-          Username = username;
-          BackToMainView = ReactiveCommand.Create(BackToMain);
+          get => _username;
+          set => this.RaiseAndSetIfChanged(ref _username, value);
      }
 
-     private void BackToMain()
+     public ChatViewModel(string? username)
      {
-          throw new NotImplementedException();
+          Console.WriteLine("Setting the name to the : " + username);
+          Username = username;
      }
 }
