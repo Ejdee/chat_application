@@ -1,0 +1,118 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:vm="clr-namespace:AvaloniaApplication1.ViewModels;assembly=AvaloniaApplication1"
+             mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="600"
+             x:DataType="vm:ChatViewModel"
+             x:Class="AvaloniaApplication1.Views.ChatView">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+    <!-- Header with back button -->
+    <Border Grid.Row="0" Height="60" Background="#36454F">
+      <Grid ColumnDefinitions="Auto,*">
+        <TextBlock Grid.Column="1" 
+                   Text="{Binding Username}" 
+                   VerticalAlignment="Center" 
+                   HorizontalAlignment="Center" 
+                   FontWeight="Bold"
+                   FontSize="18"/>
+      </Grid>
+    </Border>
+
+    <!-- Messages area -->
+    <ScrollViewer Grid.Row="1" Padding="10" VerticalScrollBarVisibility="Auto">
+      <StackPanel Spacing="10">
+        <!-- Received message -->
+        <Border Background="#36454F" 
+                CornerRadius="8" 
+                Padding="12" 
+                MaxWidth="280" 
+                HorizontalAlignment="Left">
+          <StackPanel>
+            <TextBlock Text="Hi there! How are you doing today?" 
+                       TextWrapping="Wrap" 
+                       Foreground="White"/>
+            <TextBlock Text="10:15 AM" 
+                       FontSize="10" 
+                       Foreground="#B0B0B0" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,4,0,0"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Sent message -->
+        <Border Background="#2E8B57" 
+                CornerRadius="8" 
+                Padding="12" 
+                MaxWidth="280" 
+                HorizontalAlignment="Right">
+          <StackPanel>
+            <TextBlock Text="I'm doing well, thanks for asking! Just finishing up some work. How about you?" 
+                       TextWrapping="Wrap" 
+                       Foreground="White"/>
+            <TextBlock Text="10:17 AM" 
+                       FontSize="10" 
+                       Foreground="#B0B0B0" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,4,0,0"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Received message -->
+        <Border Background="#36454F" 
+                CornerRadius="8" 
+                Padding="12" 
+                MaxWidth="280" 
+                HorizontalAlignment="Left">
+          <StackPanel>
+            <TextBlock Text="I'm great! Do you want to meet up later today?" 
+                       TextWrapping="Wrap" 
+                       Foreground="White"/>
+            <TextBlock Text="10:19 AM" 
+                       FontSize="10" 
+                       Foreground="#B0B0B0" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,4,0,0"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Sent message -->
+        <Border Background="#2E8B57" 
+                CornerRadius="8" 
+                Padding="12" 
+                MaxWidth="280" 
+                HorizontalAlignment="Right">
+          <StackPanel>
+            <TextBlock Text="Sure, that sounds good. Where would you like to meet?" 
+                       TextWrapping="Wrap" 
+                       Foreground="White"/>
+            <TextBlock Text="10:21 AM" 
+                       FontSize="10" 
+                       Foreground="#B0B0B0" 
+                       HorizontalAlignment="Right" 
+                       Margin="0,4,0,0"/>
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- Message input area -->
+    <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="10" Background="Transparent">
+      <TextBox Grid.Column="0" 
+               Watermark="Type a message..." 
+               Padding="10" 
+               VerticalContentAlignment="Center"/>
+      <Button Grid.Column="1" 
+              Margin="10,0,0,0" 
+              Padding="12" 
+              Background="#2E8B57" 
+              CornerRadius="20">
+        <PathIcon Data="M2,21L23,12L2,3V10L17,12L2,14V21Z" 
+                 Width="18" 
+                 Height="18" 
+                 Foreground="White"/>
+      </Button>
+    </Grid>
+  </Grid>
+</UserControl>

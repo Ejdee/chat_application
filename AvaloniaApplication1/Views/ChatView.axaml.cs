@@ -3,11 +3,10 @@ using AvaloniaApplication1.ViewModels;
 
 namespace AvaloniaApplication1.Views;
 
-public partial class MainWindow : Window
+public partial class ChatView : UserControl
 {
-    public MainWindow()
+    public ChatView()
     {
         InitializeComponent();
-        DataContext=  new MainWindowViewModel();
     }
 }

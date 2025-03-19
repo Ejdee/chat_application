@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using Avalonia;
 using ReactiveUI;
 
 namespace AvaloniaApplication1.ViewModels;
@@ -38,7 +39,8 @@ public class UsersFieldViewModel : ViewModelBase
 
     private void OpenChat(UserViewModel user)
     {
-        Console.WriteLine("Opening the chat with: " + user.Name);        
+        Console.WriteLine("Opening the chat with: " + user.Name);
+       // _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
     }
     
     public void OpenChatRandom()

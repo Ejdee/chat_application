@@ -4,6 +4,7 @@ using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Threading;
 using AvaloniaApplication1.Views;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 namespace AvaloniaApplication1.ViewModels;
 
@@ -13,6 +14,7 @@ public class LoginViewModel : ViewModelBase
     private string _password = string.Empty;
     private string _errorMessage = string.Empty;
     private Window _window;
+    private readonly IServiceProvider _serviceProvider;
 
     public string Email
     {
