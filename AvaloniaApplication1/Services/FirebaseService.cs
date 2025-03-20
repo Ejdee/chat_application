@@ -9,7 +9,9 @@ namespace AvaloniaApplication1.Services;
 public class FirebaseService
 {
     private readonly FirestoreDb _firestoreDb;
-    
+
+    public string CurrentUser { get; set; }
+
     public FirebaseService()
     {
         _firestoreDb = FirestoreDb.Create("Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID")");
@@ -35,8 +37,9 @@ public class FirebaseService
         foreach (var doc in snapshot.Documents)
         {
             // extract the username and create a new UserViewModel for it
-            var user = doc.GetValue<string>("username");
-            users.Add(new UserViewModel { Name = user, IsActive = false});
+            var user = doc.GetValue<string>("Username");
+            var active = doc.GetValue<string>("Status") == "Online" ? true : false;
+            users.Add(new UserViewModel { Name = user, IsActive = active});
         }
 
         return users;

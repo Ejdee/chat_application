@@ -2,16 +2,17 @@ using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
-using Avalonia.Threading;
 using AvaloniaApplication1.Services;
 using AvaloniaApplication1.Views;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
+
 namespace AvaloniaApplication1.ViewModels;
 
-public class LoginViewModel : ViewModelBase
+public class RegistrationViewModel : ViewModelBase
 {
     private string _email = string.Empty;
+    private string _username = string.Empty;
     private string _password = string.Empty;
     private string _errorMessage = string.Empty;
     private readonly FirebaseAuthService _firebaseAuthService;
@@ -22,7 +23,11 @@ public class LoginViewModel : ViewModelBase
         get => _email;
         set => this.RaiseAndSetIfChanged(ref _email, value);
     }
-    
+    public string Username
+    {
+        get => _username;
+        set => this.RaiseAndSetIfChanged(ref _username, value);
+    }
     public string Password
     {
         get => _password;
@@ -33,51 +38,44 @@ public class LoginViewModel : ViewModelBase
     {
         get => _errorMessage;
         set => this.RaiseAndSetIfChanged(ref _errorMessage, value);
-    }
+    } 
     
-    public ICommand LoginCommand { get; }
-    public ICommand GoToRegisterCommand { get; }
+    public ICommand RegisterCommand { get; }
+    public ICommand GoToLoginCommand { get; }
 
-    public LoginViewModel(AuthViewModel authViewModel)
+    public RegistrationViewModel(AuthViewModel authViewModel)
     {
-        _firebaseAuthService = App.ServiceProvider?.GetRequiredService<FirebaseAuthService>() ?? new FirebaseAuthService();
+        _firebaseAuthService = App.ServiceProvider?.GetService<FirebaseAuthService>() ?? new FirebaseAuthService();
+        RegisterCommand = ReactiveCommand.CreateFromTask(RegisterAsync);
+        GoToLoginCommand = ReactiveCommand.Create(GoToLogin);
         _authViewModel = authViewModel;
-        LoginCommand = ReactiveCommand.CreateFromTask(LoginAsync);
-        GoToRegisterCommand = ReactiveCommand.Create(GoToRegister);
     }
 
-    private void GoToRegister()
+    private void GoToLogin()
     {
-        _authViewModel.ShowRegistrationView();
+        _authViewModel.ShowLoginView();     
     }
 
-    private async Task LoginAsync()
+    private async Task RegisterAsync()
     {
-
-        _errorMessage = string.Empty;
-
-        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
         {
-            _errorMessage = "Email or password is empty";
+            ErrorMessage = "Please fill all the fields";
             return;
         }
 
         try
         {
-            Console.WriteLine("SUCCESS");
-
-            var success = await _firebaseAuthService.LoginUserAsync(Email, Password);
+            var success = await _firebaseAuthService.RegisterUserAsync(Email, Password, Username);
             if (success != null)
             {
-                Console.WriteLine("logged in");
+                _authViewModel.GoToMain();
             }
-
-            _authViewModel.GoToMain();
 
         }
         catch (Exception e)
         {
-            _errorMessage = e.Message;
+            ErrorMessage = e.Message;
         }
     }
 }

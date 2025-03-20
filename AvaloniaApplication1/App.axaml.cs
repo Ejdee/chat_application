@@ -29,7 +29,7 @@ public partial class App : Application
 
             var services = new ServiceCollection();
 
-            services.AddSingleton<FirebaseAuth>();
+            services.AddSingleton<FirebaseAuthService>();
             services.AddSingleton<FirebaseService>();
 
             services.AddTransient<LoginViewModel>();
@@ -39,9 +39,9 @@ public partial class App : Application
             
             ServiceProvider = services.BuildServiceProvider(); 
             
-            var loginView = new LoginView();
-            loginView.DataContext = new LoginViewModel(loginView);
-            desktop.MainWindow = loginView;
+            var authView = new AuthView();
+            desktop.MainWindow = authView;
+            authView.DataContext = new AuthViewModel(authView);
         }
 
         base.OnFrameworkInitializationCompleted();

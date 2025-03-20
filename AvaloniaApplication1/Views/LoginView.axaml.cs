@@ -4,11 +4,10 @@ using AvaloniaApplication1.ViewModels;
 
 namespace AvaloniaApplication1.Views;
 
-public partial class LoginView : Window
+public partial class LoginView : UserControl
 {
     public LoginView()
     {
         InitializeComponent();
-        DataContext = new LoginViewModel(this);
     } 
 }
