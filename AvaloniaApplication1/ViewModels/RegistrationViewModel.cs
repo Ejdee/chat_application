@@ -67,15 +67,22 @@ public class RegistrationViewModel : ViewModelBase
         try
         {
             var success = await _firebaseAuthService.RegisterUserAsync(Email, Password, Username);
-            if (success != null)
+            if (success.Success == true)
             {
+                // go to the main window
                 _authViewModel.GoToMain();
+            }
+            else
+            {
+                // display the error message
+                ErrorMessage = success.Message;
             }
 
         }
         catch (Exception e)
         {
             ErrorMessage = e.Message;
+            return;
         }
     }
 }

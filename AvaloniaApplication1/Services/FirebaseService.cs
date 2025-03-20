@@ -38,7 +38,7 @@ public class FirebaseService
         {
             // extract the username and create a new UserViewModel for it
             var user = doc.GetValue<string>("Username");
-            var active = doc.GetValue<string>("Status") == "Online" ? true : false;
+            var active = (doc.GetValue<string>("Status") == "Online") ? true : false;
             users.Add(new UserViewModel { Name = user, IsActive = active});
         }
 

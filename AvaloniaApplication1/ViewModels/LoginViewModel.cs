@@ -66,14 +66,19 @@ public class LoginViewModel : ViewModelBase
         {
             Console.WriteLine("SUCCESS");
 
+            // login
             var success = await _firebaseAuthService.LoginUserAsync(Email, Password);
-            if (success != null)
+            if (success.Success == true)
             {
                 Console.WriteLine("logged in");
+                // go to the main window
+                _authViewModel.GoToMain();
             }
-
-            _authViewModel.GoToMain();
-
+            else
+            {
+                // display the error
+                ErrorMessage = success.Message;
+            }
         }
         catch (Exception e)
         {

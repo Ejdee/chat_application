@@ -2,8 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Firebase.Auth;
 using Firebase.Auth.Providers;
-using FirebaseAdmin.Auth;
-using Google.Api;
 using Google.Cloud.Firestore;
 
 namespace AvaloniaApplication1.Services;
@@ -31,7 +29,7 @@ public class FirebaseAuthService
         _db = service.GetFirestoreDb();
     }
 
-    public async Task<string?> RegisterUserAsync(string email, string password, string username)
+    public async Task<(bool Success, string Message)> RegisterUserAsync(string email, string password, string username)
     {
         try
         {
@@ -46,16 +44,35 @@ public class FirebaseAuthService
                 Status = "Offline",
             });
 
-            return userCredential.User.Uid;
+            return (true, userCredential.User.Uid);
+        }
+        catch (Firebase.Auth.FirebaseAuthException ae)
+        {
+            switch (ae.Reason)
+            {
+                case AuthErrorReason.WeakPassword:
+                    return (false, "Weak password. Must be at least 6 characters long.");
+                case AuthErrorReason.EmailExists:
+                    return (false, "Email already exists.");
+                case AuthErrorReason.MissingEmail:
+                    return (false, "Email address is invalid.");
+                case AuthErrorReason.MissingPassword:
+                    return (false, "Password is invalid.");
+                case AuthErrorReason.InvalidEmailAddress:
+                    return (false, "Invalid email address.");
+                default:
+                    Console.WriteLine($"Firebase Auth Error: {ae}");
+                    return (false, $"Registration failed: {ae.Reason}");
+            }
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return null;
+            return (false, $"{e}");
         }
     }
 
-    public async Task<string?> LoginUserAsync(string email, string password)
+    public async Task<(bool Success, string Message)> LoginUserAsync(string email, string password)
     {
         try
         {
@@ -68,23 +85,53 @@ public class FirebaseAuthService
             {
                 // update status to online 
                 await userDocRef.UpdateAsync("Status", "Online");
-                
+
                 var userData = userDoc.ToDictionary();
-                
+
                 // get the username
-                var username = userData["username"].ToString();
-                return username;
+                var username = userData["Username"].ToString();
+                if (string.IsNullOrEmpty(username)) { throw new Exception("Username is empty."); }
+                return (true, username);
             }
             else
             {
                 Console.WriteLine("Login Failed: User not found");
-                return null;
+                return (false, "User not found.");
+            }
+        }
+        catch (Firebase.Auth.FirebaseAuthException ae)
+        {
+            switch (ae.Reason)
+            {
+                case AuthErrorReason.MissingEmail:
+                    return (false, "Email is invalid.");
+                case AuthErrorReason.MissingPassword:
+                    return (false, "Password is invalid.");
+                case AuthErrorReason.InvalidEmailAddress:
+                    return (false, "Invalid email address.");
+                case AuthErrorReason.WrongPassword:
+                    return (false, "Wrong password.");
+                case AuthErrorReason.UnknownEmailAddress:
+                    return (false, "Unknown email address.");
+                case AuthErrorReason.WeakPassword:
+                    return (false, "Weak password. Must be at least 6 characters long.");
+                case AuthErrorReason.UserNotFound:
+                    return (false, "User not found.");
+                default:
+                    
+                    if (ae.Message.Contains("INVALID_LOGIN_CREDENTIALS"))
+                    {
+                        return (false, "Invalid email or password.");
+                    }
+                    
+                    Console.WriteLine($"Firebase Auth Error: {ae}");
+                    return (false, $"Invalid login, possible reason: {ae.Reason}");
             }
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
-            return null;
+            return (false, $"Invalid login: {e.Message}");
         }
     }
     
