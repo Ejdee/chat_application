@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using AvaloniaApplication1.Services;
 using AvaloniaApplication1.Views;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -14,9 +15,10 @@ public class LoginViewModel : ViewModelBase
     private string _password = string.Empty;
     private string _errorMessage = string.Empty;
     private Window _window;
-    private readonly IServiceProvider _serviceProvider;
 
-    public string Email
+    private readonly FirebaseAuth _firebaseAuth;
+
+    public string Username
     {
         get => _email;
         set => this.RaiseAndSetIfChanged(ref _email, value);
@@ -38,6 +40,7 @@ public class LoginViewModel : ViewModelBase
 
     public LoginViewModel(Window window)
     {
+        _firebaseAuth = new FirebaseAuth();
         _window = window;
         LoginCommand = ReactiveCommand.CreateFromTask(LoginAsync);
     }
@@ -47,7 +50,7 @@ public class LoginViewModel : ViewModelBase
 
         _errorMessage = string.Empty;
 
-        if (string.IsNullOrEmpty(Email) || string.IsNullOrEmpty(Password))
+        if (string.IsNullOrEmpty(Username) || string.IsNullOrEmpty(Password))
         {
             _errorMessage = "Email or password is empty";
             return;
@@ -56,6 +59,12 @@ public class LoginViewModel : ViewModelBase
         try
         {
             Console.WriteLine("SUCCESS");
+
+            var success = await _firebaseAuth.UserAuth(Username, Password);
+            if (success)
+            {
+                Console.WriteLine("logged in");
+            }
             
             // redirect to main window
             var mainWindow = new MainWindow

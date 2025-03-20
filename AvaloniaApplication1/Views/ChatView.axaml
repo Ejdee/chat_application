@@ -21,80 +21,30 @@
     </Border>
 
     <!-- Messages area -->
-    <ScrollViewer Grid.Row="1" Padding="10" VerticalScrollBarVisibility="Auto">
-      <StackPanel Spacing="10">
-        <!-- Received message -->
-        <Border Background="#36454F" 
-                CornerRadius="8" 
-                Padding="12" 
-                MaxWidth="280" 
-                HorizontalAlignment="Left">
-          <StackPanel>
-            <TextBlock Text="Hi there! How are you doing today?" 
-                       TextWrapping="Wrap" 
-                       Foreground="White"/>
-            <TextBlock Text="10:15 AM" 
-                       FontSize="10" 
-                       Foreground="#B0B0B0" 
-                       HorizontalAlignment="Right" 
-                       Margin="0,4,0,0"/>
-          </StackPanel>
-        </Border>
-
-        <!-- Sent message -->
-        <Border Background="#2E8B57" 
-                CornerRadius="8" 
-                Padding="12" 
-                MaxWidth="280" 
-                HorizontalAlignment="Right">
-          <StackPanel>
-            <TextBlock Text="I'm doing well, thanks for asking! Just finishing up some work. How about you?" 
-                       TextWrapping="Wrap" 
-                       Foreground="White"/>
-            <TextBlock Text="10:17 AM" 
-                       FontSize="10" 
-                       Foreground="#B0B0B0" 
-                       HorizontalAlignment="Right" 
-                       Margin="0,4,0,0"/>
-          </StackPanel>
-        </Border>
-
-        <!-- Received message -->
-        <Border Background="#36454F" 
-                CornerRadius="8" 
-                Padding="12" 
-                MaxWidth="280" 
-                HorizontalAlignment="Left">
-          <StackPanel>
-            <TextBlock Text="I'm great! Do you want to meet up later today?" 
-                       TextWrapping="Wrap" 
-                       Foreground="White"/>
-            <TextBlock Text="10:19 AM" 
-                       FontSize="10" 
-                       Foreground="#B0B0B0" 
-                       HorizontalAlignment="Right" 
-                       Margin="0,4,0,0"/>
-          </StackPanel>
-        </Border>
-
-        <!-- Sent message -->
-        <Border Background="#2E8B57" 
-                CornerRadius="8" 
-                Padding="12" 
-                MaxWidth="280" 
-                HorizontalAlignment="Right">
-          <StackPanel>
-            <TextBlock Text="Sure, that sounds good. Where would you like to meet?" 
-                       TextWrapping="Wrap" 
-                       Foreground="White"/>
-            <TextBlock Text="10:21 AM" 
-                       FontSize="10" 
-                       Foreground="#B0B0B0" 
-                       HorizontalAlignment="Right" 
-                       Margin="0,4,0,0"/>
-          </StackPanel>
-        </Border>
-      </StackPanel>
+    <ScrollViewer Grid.Row="1" Padding="10" VerticalScrollBarVisibility="Auto" CornerRadius="12">
+        <ItemsControl ItemsSource="{Binding Messages}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Border Background="{Binding IsOwnMessage, Converter={StaticResource BoolToMessageColorConverter}}" 
+                            CornerRadius="8" 
+                            Padding="12" 
+                            MaxWidth="280" 
+                            HorizontalAlignment="{Binding IsOwnMessage, Converter={StaticResource BoolToAlignmentConverter}}"
+                            Margin="0,5,0,5">
+                        <StackPanel>
+                            <TextBlock Text="{Binding Content}" 
+                                       TextWrapping="Wrap" 
+                                       Foreground="White"/>
+                            <TextBlock Text="{Binding Timestamp}" 
+                                       FontSize="10" 
+                                       Foreground="#B0B0B0" 
+                                       HorizontalAlignment="Right" 
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </ScrollViewer>
 
     <!-- Message input area -->
@@ -102,12 +52,14 @@
       <TextBox Grid.Column="0" 
                Watermark="Type a message..." 
                Padding="10" 
-               VerticalContentAlignment="Center"/>
+               VerticalContentAlignment="Center"
+               Text="{Binding NewMessageText}"/>
       <Button Grid.Column="1" 
               Margin="10,0,0,0" 
               Padding="12" 
               Background="#2E8B57" 
-              CornerRadius="20">
+              CornerRadius="20"
+              Command="{Binding SendCommand}">
         <PathIcon Data="M2,21L23,12L2,3V10L17,12L2,14V21Z" 
                  Width="18" 
                  Height="18" 

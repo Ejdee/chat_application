@@ -12,7 +12,8 @@
 
   <Border Padding="10" 
           Width="250" 
-          VerticalAlignment="Stretch">
+          VerticalAlignment="Stretch"
+          Background="#36454F">
     <DockPanel VerticalAlignment="Stretch">
       <TextBlock Text="Pick a Chat"
                  FontWeight="Bold"
@@ -30,7 +31,7 @@
                     VerticalAlignment="Stretch">
         <ListBox ItemsSource="{Binding Users}" 
                  SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                 VerticalAlignment="Stretch">
+                 VerticalAlignment="Stretch" Background="#36454F">
           <ListBox.ItemTemplate>
             <DataTemplate DataType="vm:UserViewModel">
               <Border Margin="5"
