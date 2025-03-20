@@ -6,6 +6,7 @@ using Avalonia.Data.Core.Plugins;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
+using AvaloniaApplication1.Services;
 using AvaloniaApplication1.ViewModels;
 using AvaloniaApplication1.Views;
 using Microsoft.Extensions.DependencyInjection;
@@ -14,6 +15,7 @@ namespace AvaloniaApplication1;
 
 public partial class App : Application
 {
+    public static IServiceProvider? ServiceProvider { get; private set; }
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
@@ -24,6 +26,18 @@ public partial class App : Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             DisableAvaloniaDataAnnotationValidation();
+
+            var services = new ServiceCollection();
+
+            services.AddSingleton<FirebaseAuth>();
+            services.AddSingleton<FirebaseService>();
+
+            services.AddTransient<LoginViewModel>();
+            services.AddTransient<MainWindowViewModel>();
+            services.AddTransient<UsersFieldViewModel>();
+            services.AddTransient<ChatViewModel>();
+            
+            ServiceProvider = services.BuildServiceProvider(); 
             
             var loginView = new LoginView();
             loginView.DataContext = new LoginViewModel(loginView);

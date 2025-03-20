@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Threading.Tasks;
+using Avalonia.Controls;
 using AvaloniaApplication1.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using ReactiveUI;
@@ -24,5 +26,12 @@ public class MainWindowViewModel : ViewModelBase
     {
         UsersField = new UsersFieldViewModel(this);
         CurrentChat = new ChatViewModel("Adam");
+        
+        _ = InitializeAsync();
+    }
+
+    private async Task InitializeAsync()
+    {
+        await UsersField.LoadUsersAsync();
     }
 }

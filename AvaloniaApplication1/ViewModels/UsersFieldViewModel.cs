@@ -1,29 +1,42 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Threading.Tasks;
 using Avalonia;
+using AvaloniaApplication1.Services;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
 namespace AvaloniaApplication1.ViewModels;
 
 public class UsersFieldViewModel : ViewModelBase
 {
-    public ObservableCollection<UserViewModel> Users { get; }
+    public ObservableCollection<UserViewModel> Users { get; } = new ObservableCollection<UserViewModel>();
     private UserViewModel? _selectedUser;
     private readonly MainWindowViewModel _mainWindowViewModel;
+    private readonly FirebaseService _firebaseService;
+    private bool _isLoaded;
+
+    public bool IsLoaded
+    {
+        get => _isLoaded;
+        set => this.RaiseAndSetIfChanged(ref _isLoaded, value);
+    }
 
     public UsersFieldViewModel(MainWindowViewModel mainWindowViewModel)
     {
+        _firebaseService = App.ServiceProvider?.GetRequiredService<FirebaseService>() ?? new FirebaseService();
         _mainWindowViewModel = mainWindowViewModel;
-        Users = new ObservableCollection<UserViewModel>
+    }
+
+    public async Task LoadUsersAsync()
+    {
+        var users = await _firebaseService.GetUsersAsync();
+        foreach (var user in users)
         {
-            new UserViewModel { Name = "John Doe", IsActive = true },
-            new UserViewModel { Name = "Jane Smith", IsActive = true },
-            new UserViewModel { Name = "Bob Johnson", IsActive = false },
-            new UserViewModel { Name = "Alice Brown", IsActive = true },
-            new UserViewModel { Name = "Mike Wilson", IsActive = false },
-            new UserViewModel { Name = "Adam Baker", IsActive = true }
-        };
+            Users.Add(user);
+        }
+        IsLoaded = true;
     }
 
     public UserViewModel? SelectedUser

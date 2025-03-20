@@ -25,50 +25,61 @@
         DockPanel.Dock="Bottom"
         HorizontalAlignment="Center"
         Margin="0,20,0,0"
+        IsEnabled="{Binding IsLoaded}"
         Command="{Binding OpenChatRandom}">Pick a Random</Button>
+      
+      <Grid>
+        <ProgressBar IsVisible="{Binding !IsLoaded}"
+                     IsIndeterminate="True"
+                     Height="4"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     Margin="0,10,0,20"/>
 
-      <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
-                    VerticalAlignment="Stretch">
-        <ListBox ItemsSource="{Binding Users}" 
-                 SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                 VerticalAlignment="Stretch" Background="#36454F">
-          <ListBox.ItemTemplate>
-            <DataTemplate DataType="vm:UserViewModel">
-              <Border Margin="5"
-                      Padding="10"
-                      CornerRadius="8"
-                      Background="#36454F">
-                <Grid ColumnDefinitions="Auto,*">
-                  <Border Width="40"
-                          Height="40"
-                          CornerRadius="20"
-                          Background="{Binding AvatarColor}">
-                    <TextBlock Text="{Binding Initials}"
-                               HorizontalAlignment="Center"
-                               VerticalAlignment="Center"
-                               FontWeight="Bold"
-                               Foreground="Black"/>
-                  </Border>
-                  <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                    <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                    <Grid ColumnDefinitions="Auto,*">
-                      <Ellipse Width="8"
-                               Height="8"
-                               Fill="{Binding StatusColor}"
-                               VerticalAlignment="Center"/>
-                      <TextBlock Grid.Column="1"
-                                 Text="{Binding Status}"
-                                 FontSize="12"
-                                 Opacity="0.7"
-                                 Margin="5,0,0,0"/>
-                    </Grid>
-                  </StackPanel>
-                </Grid>
-              </Border>
-            </DataTemplate>
-          </ListBox.ItemTemplate>
-        </ListBox>
-      </ScrollViewer>
+        <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled"
+                      IsVisible="{Binding IsLoaded}"
+                      VerticalAlignment="Stretch">
+          <ListBox ItemsSource="{Binding Users}"
+                   SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                   VerticalAlignment="Stretch" Background="#36454F">
+            <ListBox.ItemTemplate>
+              <DataTemplate DataType="vm:UserViewModel">
+                <Border Margin="5"
+                        Padding="10"
+                        CornerRadius="8"
+                        Background="#36454F">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <Border Width="40"
+                            Height="40"
+                            CornerRadius="20"
+                            Background="{Binding AvatarColor}">
+                      <TextBlock Text="{Binding Initials}"
+                                 HorizontalAlignment="Center"
+                                 VerticalAlignment="Center"
+                                 FontWeight="Bold"
+                                 Foreground="Black"/>
+                    </Border>
+                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                      <Grid ColumnDefinitions="Auto,*">
+                        <Ellipse Width="8"
+                                 Height="8"
+                                 Fill="{Binding StatusColor}"
+                                 VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding Status}"
+                                   FontSize="12"
+                                   Opacity="0.7"
+                                   Margin="5,0,0,0"/>
+                      </Grid>
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+          </ListBox>
+        </ScrollViewer>
+      </Grid>
     </DockPanel>
   </Border>
 </UserControl>

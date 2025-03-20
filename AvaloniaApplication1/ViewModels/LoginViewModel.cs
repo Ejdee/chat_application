@@ -15,7 +15,6 @@ public class LoginViewModel : ViewModelBase
     private string _password = string.Empty;
     private string _errorMessage = string.Empty;
     private Window _window;
-
     private readonly FirebaseAuth _firebaseAuth;
 
     public string Username
@@ -40,7 +39,7 @@ public class LoginViewModel : ViewModelBase
 
     public LoginViewModel(Window window)
     {
-        _firebaseAuth = new FirebaseAuth();
+        _firebaseAuth = App.ServiceProvider?.GetRequiredService<FirebaseAuth>() ?? new FirebaseAuth();
         _window = window;
         LoginCommand = ReactiveCommand.CreateFromTask(LoginAsync);
     }
@@ -69,7 +68,7 @@ public class LoginViewModel : ViewModelBase
             // redirect to main window
             var mainWindow = new MainWindow
             {
-                DataContext = new MainWindowViewModel()
+                DataContext = App.ServiceProvider?.GetRequiredService<MainWindowViewModel>() ?? new MainWindowViewModel()
             };
             
             mainWindow.Show();
