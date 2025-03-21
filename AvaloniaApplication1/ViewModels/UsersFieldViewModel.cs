@@ -47,22 +47,42 @@ public class UsersFieldViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _selectedUser, value);
             if (_selectedUser != null)
             {
-                OpenChat(_selectedUser);
+                _ = OpenChatAsync(_selectedUser);
             }
         }
     }
 
-    private void OpenChat(UserViewModel user)
+    private async Task OpenChatAsync(UserViewModel user)
     {
-        Console.WriteLine("Opening the chat with: " + user.Name);
-        _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
+        try
+        {
+            Console.WriteLine("Opening the chat with: " + user.Name);
+            _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
+            List<MessageViewModel> messages = await _firebaseService.LoadChat(user.Name);
+
+            if (_mainWindowViewModel.CurrentChat.Messages != null)
+            {
+                // clear the old messages
+                _mainWindowViewModel.CurrentChat.Messages.Clear();
+
+                // add the new messages
+                foreach (var message in messages)
+                {
+                    _mainWindowViewModel.CurrentChat.Messages.Add(message);
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
     
     public void OpenChatRandom()
     {
         var random = new Random();
         var index = random.Next(Users.Count);
-        OpenChat(Users[index]);
+        _ = OpenChatAsync(Users[index]);
     }
 }
 

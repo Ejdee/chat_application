@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Threading.Tasks;
 using AvaloniaApplication1.ViewModels;
 using Google.Cloud.Firestore;
@@ -10,7 +11,7 @@ public class FirebaseService
 {
     private readonly FirestoreDb _firestoreDb;
 
-    public string CurrentUser { get; set; }
+    public string CurrentUser { get; set; } = string.Empty;
 
     public FirebaseService()
     {
@@ -43,5 +44,80 @@ public class FirebaseService
         }
 
         return users;
+    }
+
+    public async Task<List<MessageViewModel>> LoadChat(string? userName)
+    {
+        var chatMessagesResult = new List<MessageViewModel>();
+        var userUid = await GetUserUid(userName);
+        if(userUid == null) { throw new DataException("User not found."); }
+
+        var chatUid = String.CompareOrdinal(CurrentUser, userUid) < 0 ? 
+            CurrentUser + "_" + userUid : 
+            userUid + "_" + CurrentUser;
+        
+        var chatCollection = _firestoreDb.Collection("chat");
+        var query = chatCollection.WhereEqualTo("ChatUid", chatUid);
+        var snapshot = await query.GetSnapshotAsync();
+
+        if (snapshot.Documents.Count > 0)
+        {
+            var chatDocument = snapshot.Documents[0];
+            var messages = chatDocument.Reference.Collection("messages");
+            var messagesSnapshot = await messages.OrderBy("Timestamp").GetSnapshotAsync();
+
+            // load the messages from the chat
+            foreach (var message in messagesSnapshot.Documents)
+            {
+                chatMessagesResult.Add(new MessageViewModel
+                {
+                    Content = message.GetValue<string>("Content"),
+                    IsOwnMessage = message.GetValue<string>("Sender") == CurrentUser,
+                    Timestamp = message.GetValue<string>("Timestamp")
+                }); 
+            }
+        }
+        else
+        {
+            // if the chat doesn't exit, create one
+            var chatRefDoc = chatCollection.Document();
+            await chatRefDoc.SetAsync(new
+            {
+                ChatUid = chatUid,
+                CreatedAt = DateTime.UtcNow,
+            });
+        }
+
+        return chatMessagesResult;
+    }
+
+    /// <summary>
+    /// Get the Uid of the user based on the username
+    /// </summary>
+    /// <param name="userName">the username</param>
+    /// <returns>Uid or null if unsuccessful</returns>
+    private async Task<string?> GetUserUid(string? userName)
+    {
+        try
+        {
+            var usersCollection = _firestoreDb.Collection("users");
+            var query = usersCollection.WhereEqualTo("Username", userName);
+            var snapshot = await query.GetSnapshotAsync();
+
+            if (snapshot.Documents.Count > 0)
+            {
+                return snapshot.Documents[0].Id;
+            }
+            else
+            {
+                Console.WriteLine("No user found.");
+                return null;
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error getting the Uid: {e}");
+            return null;
+        }
     }
 }

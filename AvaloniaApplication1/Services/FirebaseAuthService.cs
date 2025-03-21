@@ -2,7 +2,9 @@ using System;
 using System.Threading.Tasks;
 using Firebase.Auth;
 using Firebase.Auth.Providers;
+using Google.Api;
 using Google.Cloud.Firestore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace AvaloniaApplication1.Services;
 
@@ -10,6 +12,7 @@ public class FirebaseAuthService
 {
     private readonly FirestoreDb _db;
     private readonly FirebaseAuthClient _authClient;
+    private readonly FirebaseService _service;
 
     public FirebaseAuthService()
     {
@@ -25,8 +28,8 @@ public class FirebaseAuthService
 
         _authClient = new FirebaseAuthClient(config);
         
-        var service = new FirebaseService();
-        _db = service.GetFirestoreDb();
+        _service = App.ServiceProvider?.GetRequiredService<FirebaseService>() ?? new FirebaseService();
+        _db = _service.GetFirestoreDb();
     }
 
     public async Task<(bool Success, string Message)> RegisterUserAsync(string email, string password, string username)
@@ -43,6 +46,8 @@ public class FirebaseAuthService
                 CreatedAt = DateTime.UtcNow,
                 Status = "Offline",
             });
+
+            _service.CurrentUser = userCredential.User.Uid;
 
             return (true, userCredential.User.Uid);
         }
@@ -87,7 +92,10 @@ public class FirebaseAuthService
                 await userDocRef.UpdateAsync("Status", "Online");
 
                 var userData = userDoc.ToDictionary();
-
+                
+                // store the current user
+                 _service.CurrentUser = userCredential.User.Uid; 
+                 
                 // get the username
                 var username = userData["Username"].ToString();
                 if (string.IsNullOrEmpty(username)) { throw new Exception("Username is empty."); }

@@ -9,6 +9,7 @@
              <Application.Resources>
                  <converters:BoolToMessageColorConverter x:Key="BoolToMessageColorConverter" />
                  <converters:BoolToAlignmentConverter x:Key="BoolToAlignmentConverter" />
+                 <converters:EmptyCollectionToBoolConverter x:Key="EmptyCollectionToBoolConverter" />
              </Application.Resources>
              <Application.DataTemplates>
         <local:ViewLocator/>

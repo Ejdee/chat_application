@@ -21,31 +21,41 @@
     </Border>
 
     <!-- Messages area -->
-    <ScrollViewer Grid.Row="1" Padding="10" VerticalScrollBarVisibility="Auto" CornerRadius="12">
-        <ItemsControl ItemsSource="{Binding Messages}">
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Border Background="{Binding IsOwnMessage, Converter={StaticResource BoolToMessageColorConverter}}" 
-                            CornerRadius="8" 
-                            Padding="12" 
-                            MaxWidth="280" 
-                            HorizontalAlignment="{Binding IsOwnMessage, Converter={StaticResource BoolToAlignmentConverter}}"
-                            Margin="0,5,0,5">
-                        <StackPanel>
-                            <TextBlock Text="{Binding Content}" 
-                                       TextWrapping="Wrap" 
-                                       Foreground="White"/>
-                            <TextBlock Text="{Binding Timestamp}" 
-                                       FontSize="10" 
-                                       Foreground="#B0B0B0" 
-                                       HorizontalAlignment="Right" 
-                                       Margin="0,4,0,0"/>
-                        </StackPanel>
-                    </Border>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
-    </ScrollViewer>
+    <Grid Grid.Row="1">
+        <ScrollViewer Padding="10" VerticalScrollBarVisibility="Auto" CornerRadius="12">
+            <ItemsControl ItemsSource="{Binding Messages}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Background="{Binding IsOwnMessage, Converter={StaticResource BoolToMessageColorConverter}}" 
+                                CornerRadius="8" 
+                                Padding="12" 
+                                MaxWidth="280" 
+                                HorizontalAlignment="{Binding IsOwnMessage, Converter={StaticResource BoolToAlignmentConverter}}"
+                                Margin="0,5,0,5">
+                            <StackPanel>
+                                <TextBlock Text="{Binding Content}" 
+                                           TextWrapping="Wrap" 
+                                           Foreground="White"/>
+                                <TextBlock Text="{Binding Timestamp}" 
+                                           FontSize="10" 
+                                           Foreground="#B0B0B0" 
+                                           HorizontalAlignment="Right" 
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+        
+        <TextBlock Grid.Row="0" 
+                   Text="No messages yet"
+                   FontSize="16"
+                   Foreground="#B0B0B0"
+                   HorizontalAlignment="Center"
+                   VerticalAlignment="Center"
+                   IsVisible="{Binding Messages.Count, Converter={StaticResource EmptyCollectionToBoolConverter}}"/>
+    </Grid>
 
     <!-- Message input area -->
     <Grid Grid.Row="2" ColumnDefinitions="*,Auto" Margin="10" Background="Transparent">
