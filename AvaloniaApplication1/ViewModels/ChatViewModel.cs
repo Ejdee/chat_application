@@ -1,7 +1,10 @@
 using System;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
+using System.Linq;
 using System.Windows.Input;
+using AvaloniaApplication1.Services;
+using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
 namespace AvaloniaApplication1.ViewModels;
@@ -9,13 +12,16 @@ namespace AvaloniaApplication1.ViewModels;
 public class ChatViewModel : ViewModelBase
 { 
     private string? _username;
+    private bool _messagesLoaded;
+    private ObservableCollection<MessageViewModel>? _messages = new();
+    private string? _newMessageText;
+    private readonly FirebaseService _firebaseService;
+    
     public string? Username
     { 
         get => _username; 
         set => this.RaiseAndSetIfChanged(ref _username, value);
     }
-
-    private bool _messagesLoaded;
     public bool MessagesLoaded
     {
         get => _messagesLoaded;
@@ -25,8 +31,6 @@ public class ChatViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(ShowNoMessagesText));
         }
     }
-
-    private ObservableCollection<MessageViewModel>? _messages = new();
     public ObservableCollection<MessageViewModel>? Messages
     {
         get => _messages;
@@ -43,16 +47,12 @@ public class ChatViewModel : ViewModelBase
             this.RaisePropertyChanged(nameof(ShowNoMessagesText));
         } 
     }
-
     private void OnMessageChanged(object? sender, NotifyCollectionChangedEventArgs e)
     {
         // trigger the ShowNoMessagesText property to update
         this.RaisePropertyChanged(nameof(ShowNoMessagesText));
     }
-
     public bool ShowNoMessagesText => MessagesLoaded && (Messages == null || Messages.Count == 0);
-
-    private string? _newMessageText;
     public string? NewMessageText
     {
         get => _newMessageText;
@@ -65,38 +65,58 @@ public class ChatViewModel : ViewModelBase
     {
         Username = username;
         
-        Messages = new ObservableCollection<MessageViewModel>
-        {
-            new MessageViewModel { Content = "Hello!", Timestamp = "12:00", IsOwnMessage = false }, 
-            new MessageViewModel { Content = "Hi!", Timestamp = "12:01", IsOwnMessage = true }, 
-            new MessageViewModel
-             { Content = "How are you doing, my friendly friend?", Timestamp = "12:02", IsOwnMessage = false }, 
-            new MessageViewModel 
-            { 
-                Content = "I am doing really good actually, today I was hungry so i cooked some shit!", 
-                Timestamp = "12:03", IsOwnMessage = true 
-            }, 
-        };
+        _firebaseService = App.ServiceProvider?.GetRequiredService<FirebaseService>() ?? new FirebaseService();
+
+        Messages = new ObservableCollection<MessageViewModel>();
 
         SendCommand = ReactiveCommand.Create(SendMessage);
     }
-    
-    public void SendMessage()
-    {
-        // if the message is empty, don't send anything
-        if (string.IsNullOrWhiteSpace(NewMessageText))
-            return;
 
-        string messageText = NewMessageText;
-        
-        // add the message to the list of messages
-        Messages?.Add(new MessageViewModel
+    public void OnMessageUpdated(MessageViewModel message, string change)
+    {
+        switch (change)
         {
-            Content = messageText,
-            Timestamp = DateTime.Now.ToString("HH:mm"),
-            IsOwnMessage = true
-        });
-        NewMessageText = "";
+            case "added":
+                Messages?.Add(message);
+                break;
+            case "modified":
+                var existingMessage = Messages?.FirstOrDefault(m => m.Timestamp == message.Timestamp);
+                if (existingMessage != null) { existingMessage.Content = message.Content; }
+
+                break;
+            case "removed":
+                var messageToRemove = Messages?.FirstOrDefault(m => m.Timestamp == message.Timestamp);
+                if(messageToRemove != null) { Messages?.Remove(messageToRemove); }
+
+                break;
+        } 
+    }
+    
+    public async void SendMessage()
+    {
+        try
+        {
+            // if the message is empty, don't send anything
+            if (string.IsNullOrWhiteSpace(NewMessageText))
+                return;
+
+            var content = NewMessageText;
+            // clear the field
+            NewMessageText = "";
+
+            try
+            {
+                await _firebaseService.SendMessageAsync(content);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error sending a message: {e}");
+            }
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error sending a message: {e}");
+        }
     }    
 }
 

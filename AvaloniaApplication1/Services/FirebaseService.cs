@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Markup.Xaml.Converters;
+using Avalonia.Metadata;
 using AvaloniaApplication1.ViewModels;
 using Google.Cloud.Firestore;
 
@@ -10,6 +13,8 @@ namespace AvaloniaApplication1.Services;
 public class FirebaseService
 {
     private readonly FirestoreDb _firestoreDb;
+    private string? CurrentChatUid { get; set; } = null;
+    private FirestoreChangeListener? _chatListener;
 
     public string CurrentUser { get; set; } = string.Empty;
 
@@ -46,7 +51,7 @@ public class FirebaseService
         return users;
     }
 
-    public async Task<List<MessageViewModel>> LoadChat(string? userName)
+    public async Task<List<MessageViewModel>> LoadChatAsync(string? userName)
     {
         var chatMessagesResult = new List<MessageViewModel>();
         
@@ -58,6 +63,9 @@ public class FirebaseService
         var chatUid = String.CompareOrdinal(CurrentUser, userUid) < 0 ? 
             CurrentUser + "_" + userUid : 
             userUid + "_" + CurrentUser;
+        
+        // store the chat Uid for future reference
+        CurrentChatUid = chatUid;
         
         var chatCollection = _firestoreDb.Collection("chat");
         var query = chatCollection.WhereEqualTo("ChatUid", chatUid);
@@ -122,5 +130,53 @@ public class FirebaseService
             Console.WriteLine($"Error getting the Uid: {e}");
             return null;
         }
+    }
+
+    public async Task SendMessageAsync(string content)
+    {
+        try
+        {
+            var chatCollection = _firestoreDb.Collection("chat").Document(CurrentChatUid);
+            var messagesCollection = chatCollection.Collection("messages");
+
+            await messagesCollection.AddAsync(new
+            {
+                Content = content,
+                Sender = CurrentUser,
+                Timestamp = DateTime.UtcNow.ToString("HH:mm")
+            });
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine($"Error sending message: {e}");
+            throw;
+        }
+    }
+
+    public void ListenForChatUpdates(Action<MessageViewModel, string> onMessagesUpdated)
+    {
+        _chatListener?.StopAsync();
+        
+        var chatCollection = _firestoreDb.Collection("chat").Document(CurrentChatUid).Collection("messages").OrderBy("Timestamp");
+        _chatListener = chatCollection.Listen(snapshot =>
+        {
+            foreach (var change in snapshot.Changes)
+            {
+                // get the message
+                var messageDoc = change.Document;
+                var message = new MessageViewModel
+                {
+                    Content = messageDoc.GetValue<string>("Content"),
+                    IsOwnMessage = messageDoc.GetValue<string>("Sender") == CurrentUser,
+                    Timestamp = messageDoc.GetValue<string>("Timestamp")
+                };
+                
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    var changeType = change.ChangeType.ToString().ToLower();
+                    onMessagesUpdated(message, changeType);
+                });
+            }
+        });
     }
 }

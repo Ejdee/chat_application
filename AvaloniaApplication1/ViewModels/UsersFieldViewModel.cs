@@ -60,7 +60,7 @@ public class UsersFieldViewModel : ViewModelBase
             _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
             _mainWindowViewModel.CurrentChat.MessagesLoaded = false;
             
-            List<MessageViewModel> messages = await _firebaseService.LoadChat(user.Name);
+            List<MessageViewModel> messages = await _firebaseService.LoadChatAsync(user.Name);
             
             if (_mainWindowViewModel.CurrentChat.Messages != null)
             {
@@ -75,6 +75,7 @@ public class UsersFieldViewModel : ViewModelBase
                 
                 // indicate, that the messages are loaded
                 _mainWindowViewModel.CurrentChat.MessagesLoaded = true;
+                _firebaseService.ListenForChatUpdates(_mainWindowViewModel.CurrentChat.OnMessageUpdated);
             }
         }
         catch (Exception e)
