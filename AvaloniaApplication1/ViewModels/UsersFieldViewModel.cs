@@ -1,9 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using AvaloniaApplication1.Services;
+using Firebase.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 
@@ -36,7 +37,69 @@ public class UsersFieldViewModel : ViewModelBase
         {
             Users.Add(user);
         }
+
+        SortUsersByActivity();
+        
+        _firebaseService.ListenForUserStatus(OnUserUpdated);
         IsLoaded = true;
+    }
+
+    private void SortUsersByActivity()
+    {
+        var sortedUsers = Users.OrderByDescending(u => u.IsActive).ToList();
+        
+        Users.Clear();
+        foreach (var user in sortedUsers)
+        {
+            Users.Add(user);
+        }
+    }
+
+    private void OnUserUpdated(UserViewModel user, string action)
+    {
+        switch (action)
+        {
+            case "added":
+                if (Users.All(u => u.Name != user.Name))
+                {
+                    if (user.IsActive)
+                    {
+                        // if active - add to the beginning of the list
+                        Users.Insert(0, user);
+                    }
+                    else
+                    {
+                        // if offline - add to the end of the list
+                        Users.Add(user);
+                    }
+                }
+
+                break;
+            case "modified":
+                var modifiedUser = Users.FirstOrDefault(u => u.Name == user.Name);
+                if (modifiedUser != null)
+                {
+                    Users.Remove(modifiedUser); 
+                    
+                    modifiedUser.Name = user.Name;
+                    modifiedUser.IsActive = user.IsActive;
+                    
+                    // if active - add to the beginning of the list
+                    // if offline - add to the end of the list
+                    if (modifiedUser.IsActive) { Users.Insert(0, modifiedUser); }
+                    else { Users.Add(modifiedUser); }
+                }
+
+                break;
+            case "removed":
+                var userToRemove = Users.FirstOrDefault(u => u.Name == user.Name);
+                if (userToRemove != null)
+                {
+                    Users.Remove(userToRemove);
+                }
+
+                break;
+        }
     }
 
     public UserViewModel? SelectedUser

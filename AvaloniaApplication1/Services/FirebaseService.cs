@@ -15,6 +15,7 @@ public class FirebaseService
     private readonly FirestoreDb _firestoreDb;
     private string? CurrentChatUid { get; set; } = null;
     private FirestoreChangeListener? _chatListener;
+    private FirestoreChangeListener? _userStatusListener;
 
     public string CurrentUser { get; set; } = string.Empty;
 
@@ -32,7 +33,7 @@ public class FirebaseService
     public async Task<List<UserViewModel>> GetUsersAsync()
     {
         // testing purposes delay
-        await Task.Delay(5000); 
+        //await Task.Delay(5000); 
         
         var usersCollection = _firestoreDb.Collection("users");
         var snapshot = await usersCollection.GetSnapshotAsync();
@@ -42,6 +43,9 @@ public class FirebaseService
 
         foreach (var doc in snapshot.Documents)
         {
+            // skip the current user
+            if (doc.Id == CurrentUser) { continue; }
+            
             // extract the username and create a new UserViewModel for it
             var user = doc.GetValue<string>("Username");
             var active = (doc.GetValue<string>("Status") == "Online") ? true : false;
@@ -175,6 +179,56 @@ public class FirebaseService
                 {
                     var changeType = change.ChangeType.ToString().ToLower();
                     onMessagesUpdated(message, changeType);
+                });
+            }
+        });
+    }
+
+    public async Task LogOutUserAsync()
+    {
+        try
+        {
+            // stop the chat listener
+            _chatListener?.StopAsync();
+
+            if (!string.IsNullOrEmpty(CurrentUser))
+            {
+                var userDocRef = _firestoreDb.Collection("users").Document(CurrentUser);
+                await userDocRef.UpdateAsync("Status", "Offline");
+            }
+
+            CurrentUser = "";
+            CurrentChatUid = "";
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine("Error logging out: " + e);
+        }
+    }
+
+    public void ListenForUserStatus(Action<UserViewModel, string> onUserUpdated)
+    {
+        _userStatusListener?.StopAsync();
+
+        var usersDoc = _firestoreDb.Collection("users");
+        _userStatusListener = usersDoc.Listen(snapshot =>
+        {
+            foreach (var change in snapshot.Changes)
+            {
+                var userDoc = change.Document;
+
+                // skip the current user 
+                if (userDoc.Id == CurrentUser) { continue; }
+                
+                var user = new UserViewModel
+                {
+                    Name = userDoc.GetValue<string>("Username"),
+                    IsActive = userDoc.GetValue<string>("Status") == "Online"
+                };
+
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    onUserUpdated(user, change.ChangeType.ToString().ToLower());
                 });
             }
         });
