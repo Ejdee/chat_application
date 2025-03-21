@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.Windows.Input;
 using ReactiveUI;
 
@@ -14,12 +15,42 @@ public class ChatViewModel : ViewModelBase
         set => this.RaiseAndSetIfChanged(ref _username, value);
     }
 
+    private bool _messagesLoaded;
+    public bool MessagesLoaded
+    {
+        get => _messagesLoaded;
+        set
+        {
+            this.RaiseAndSetIfChanged(ref _messagesLoaded, value);
+            this.RaisePropertyChanged(nameof(ShowNoMessagesText));
+        }
+    }
+
     private ObservableCollection<MessageViewModel>? _messages = new();
     public ObservableCollection<MessageViewModel>? Messages
     {
         get => _messages;
-        set => this.RaiseAndSetIfChanged(ref _messages, value);
+        set
+        {
+            // unsubscribe from the old collection
+            if (_messages != null) { _messages.CollectionChanged -= OnMessageChanged; }
+            
+            this.RaiseAndSetIfChanged(ref _messages, value);
+            
+            // subscribe to the new collection
+            if(_messages != null) { _messages.CollectionChanged += OnMessageChanged; }
+            
+            this.RaisePropertyChanged(nameof(ShowNoMessagesText));
+        } 
     }
+
+    private void OnMessageChanged(object? sender, NotifyCollectionChangedEventArgs e)
+    {
+        // trigger the ShowNoMessagesText property to update
+        this.RaisePropertyChanged(nameof(ShowNoMessagesText));
+    }
+
+    public bool ShowNoMessagesText => MessagesLoaded && (Messages == null || Messages.Count == 0);
 
     private string? _newMessageText;
     public string? NewMessageText
@@ -31,7 +62,7 @@ public class ChatViewModel : ViewModelBase
     public ICommand SendCommand { get; }
     
     public ChatViewModel(string? username)
-    { 
+    {
         Username = username;
         
         Messages = new ObservableCollection<MessageViewModel>

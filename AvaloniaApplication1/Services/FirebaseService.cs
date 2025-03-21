@@ -49,9 +49,12 @@ public class FirebaseService
     public async Task<List<MessageViewModel>> LoadChat(string? userName)
     {
         var chatMessagesResult = new List<MessageViewModel>();
+        
+        // get the Uid of the "receiver" user
         var userUid = await GetUserUid(userName);
         if(userUid == null) { throw new DataException("User not found."); }
 
+        // generate an Uid for the chat - combination of the Uids of the two users, sorted alphabetically
         var chatUid = String.CompareOrdinal(CurrentUser, userUid) < 0 ? 
             CurrentUser + "_" + userUid : 
             userUid + "_" + CurrentUser;

@@ -58,8 +58,10 @@ public class UsersFieldViewModel : ViewModelBase
         {
             Console.WriteLine("Opening the chat with: " + user.Name);
             _mainWindowViewModel.CurrentChat = new ChatViewModel(user.Name);
+            _mainWindowViewModel.CurrentChat.MessagesLoaded = false;
+            
             List<MessageViewModel> messages = await _firebaseService.LoadChat(user.Name);
-
+            
             if (_mainWindowViewModel.CurrentChat.Messages != null)
             {
                 // clear the old messages
@@ -70,6 +72,9 @@ public class UsersFieldViewModel : ViewModelBase
                 {
                     _mainWindowViewModel.CurrentChat.Messages.Add(message);
                 }
+                
+                // indicate, that the messages are loaded
+                _mainWindowViewModel.CurrentChat.MessagesLoaded = true;
             }
         }
         catch (Exception e)

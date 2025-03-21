@@ -22,8 +22,16 @@
 
     <!-- Messages area -->
     <Grid Grid.Row="1">
+        <ProgressBar IsVisible="{Binding !MessagesLoaded}"
+                     IsIndeterminate="True"
+                     Height="4"
+                     Width="200"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     Margin="0,10,0,20"/>
+
         <ScrollViewer Padding="10" VerticalScrollBarVisibility="Auto" CornerRadius="12">
-            <ItemsControl ItemsSource="{Binding Messages}">
+            <ItemsControl ItemsSource="{Binding Messages}" IsVisible="{Binding MessagesLoaded}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border Background="{Binding IsOwnMessage, Converter={StaticResource BoolToMessageColorConverter}}" 
@@ -54,7 +62,7 @@
                    Foreground="#B0B0B0"
                    HorizontalAlignment="Center"
                    VerticalAlignment="Center"
-                   IsVisible="{Binding Messages.Count, Converter={StaticResource EmptyCollectionToBoolConverter}}"/>
+                   IsVisible="{Binding ShowNoMessagesText}"/>
     </Grid>
 
     <!-- Message input area -->
