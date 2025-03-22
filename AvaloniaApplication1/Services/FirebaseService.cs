@@ -2,12 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Data;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Markup.Xaml.Converters;
-using Avalonia.Metadata;
 using AvaloniaApplication1.ViewModels;
 using Google.Cloud.Firestore;
-using Google.Protobuf.WellKnownTypes;
 
 namespace AvaloniaApplication1.Services;
 
@@ -17,6 +13,7 @@ public class FirebaseService
     private string? CurrentChatUid { get; set; } = null;
     private FirestoreChangeListener? _chatListener;
     private FirestoreChangeListener? _userStatusListener;
+    private bool _initialChatLoad = true;
 
     public string CurrentUser { get; set; } = string.Empty;
 
@@ -75,20 +72,22 @@ public class FirebaseService
         // store the chat Uid for future reference
         CurrentChatUid = chatUid;
         
-        var chatCollection = _firestoreDb.Collection("chat");
-        var query = chatCollection.WhereEqualTo("ChatUid", chatUid);
-        var snapshot = await query.GetSnapshotAsync();
+        //var chatCollection = _firestoreDb.Collection("chat");
+        //var query = chatCollection.WhereEqualTo("ChatUid", chatUid);
+        //var snapshot = await query.GetSnapshotAsync();
+        var chatDocRef = _firestoreDb.Collection("chat").Document(chatUid);
+        var snapshot = await chatDocRef.GetSnapshotAsync();
 
-        if (snapshot.Documents.Count > 0)
+        if (snapshot.Exists)
         {
-            var chatDocument = snapshot.Documents[0];
+            await ClearTheNewMessageIndicatorAsync(chatDocRef);
             
             // update the currently reading list with adding the current user (that opened it)
-            await chatDocument.Reference.UpdateAsync("CurrentlyReading", FieldValue.ArrayUnion(CurrentUser));
+            await chatDocRef.UpdateAsync("CurrentlyReading", FieldValue.ArrayUnion(CurrentUser));
             Console.WriteLine("Currently reading set: " + CurrentUser);
             
             
-            var messages = chatDocument.Reference.Collection("messages");
+            var messages = chatDocRef.Collection("messages");
             var messagesSnapshot = await messages.OrderBy("Timestamp").GetSnapshotAsync();
 
             // load the messages from the chat
@@ -105,13 +104,11 @@ public class FirebaseService
         else
         {
             // if the chat doesn't exit, create one
-            var chatRefDoc = chatCollection.Document();
             var userIds = chatUid.Split("_");
-            await chatRefDoc.SetAsync(new
+            await chatDocRef.SetAsync(new
             {
-                ChatUid = chatUid,
                 CreatedAt = DateTime.UtcNow,
-                CurrentlyReading = new List<string>(),
+                CurrentlyReading = new List<string> { CurrentUser },
                 NewMessageIndicator = new Dictionary<string, bool>
                 {
                     { userIds[0], false },
@@ -123,18 +120,23 @@ public class FirebaseService
         return chatMessagesResult;
     }
 
+    private async Task ClearTheNewMessageIndicatorAsync(DocumentReference chatDocument)
+    {
+        await chatDocument.UpdateAsync($"NewMessageIndicator.{CurrentUser}", false);
+    }
+
     public async Task ClearTheCurrentlyReadingAsync()
     {
-        var chatCollection = _firestoreDb.Collection("chat");
+        if (string.IsNullOrEmpty(CurrentChatUid)) { return; }
+        
+        var chatDocRef= _firestoreDb.Collection("chat").Document(CurrentChatUid);
         Console.WriteLine("Current ChatUID: " + CurrentChatUid);
         if (CurrentChatUid != null)
         {
-            var query = chatCollection.WhereEqualTo("ChatUid", CurrentChatUid);
-            var snapshotChat = await query.GetSnapshotAsync();
-            if (snapshotChat.Documents.Count > 0)
+            var snapshotChat = await chatDocRef.GetSnapshotAsync();
+            if (snapshotChat.Exists)
             {
-                var chatDocument = snapshotChat.Documents[0];
-                await chatDocument.Reference.UpdateAsync("CurrentlyReading", FieldValue.ArrayRemove(CurrentUser));
+                await chatDocRef.UpdateAsync("CurrentlyReading", FieldValue.ArrayRemove(CurrentUser));
                 Console.WriteLine("Currently reading removed: " + CurrentUser);
             }
         }
@@ -174,10 +176,15 @@ public class FirebaseService
     {
         try
         {
-            var chatCollection = _firestoreDb.Collection("chat").Document(CurrentChatUid);
-            var messagesCollection = chatCollection.Collection("messages");
+            var chatDocument = _firestoreDb.Collection("chat").Document(CurrentChatUid);
+            var snapshot = await chatDocument.GetSnapshotAsync();
 
-            await messagesCollection.AddAsync(new
+            if (!snapshot.Exists) return; // Ensure the chat exists
+
+            await StoreNewMessageIndicator(snapshot);
+
+            var messages = chatDocument.Collection("messages");
+            await messages.AddAsync(new
             {
                 Content = content,
                 Sender = CurrentUser,
@@ -191,13 +198,41 @@ public class FirebaseService
         }
     }
 
+    private async Task StoreNewMessageIndicator(DocumentSnapshot chatDocument)
+    {
+        var currentlyReading = chatDocument.GetValue<List<string>>("CurrentlyReading");
+        if (currentlyReading == null) { currentlyReading = new List<string>(); }
+        
+        if (!string.IsNullOrEmpty(CurrentChatUid))
+        {
+            var userIds = CurrentChatUid.Split("_");
+            foreach (var id in userIds)
+            {
+                if (!currentlyReading.Contains(id))
+                {
+                     await chatDocument.Reference.UpdateAsync($"NewMessageIndicator.{id}", true);
+                }
+            }
+        }
+    }
+
     public void ListenForChatUpdates(Action<MessageViewModel, string> onMessagesUpdated)
     {
         _chatListener?.StopAsync();
         
+        // set the flag to avoid multiple chat messages on loading the chat
+        _initialChatLoad = true;
+        
         var chatCollection = _firestoreDb.Collection("chat").Document(CurrentChatUid).Collection("messages").OrderBy("Timestamp");
         _chatListener = chatCollection.Listen(snapshot =>
         {
+            // only if the chat is already loaded
+            if (_initialChatLoad)
+            {
+                _initialChatLoad = false;
+                return;
+            } 
+            
             foreach (var change in snapshot.Changes)
             {
                 // get the message
