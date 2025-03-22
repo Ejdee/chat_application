@@ -3,6 +3,7 @@ using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.Linq;
 using System.Windows.Input;
+using Avalonia.Controls;
 using AvaloniaApplication1.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -16,6 +17,12 @@ public class ChatViewModel : ViewModelBase
     private ObservableCollection<MessageViewModel>? _messages = new();
     private string? _newMessageText;
     private readonly FirebaseService _firebaseService;
+    private ScrollViewer? _messageScrollViewer;
+
+    public void SetScrollViewer(ScrollViewer scrollViewer)
+    {
+        _messageScrollViewer = scrollViewer;
+    }
     
     public string? Username
     { 
@@ -42,7 +49,21 @@ public class ChatViewModel : ViewModelBase
             this.RaiseAndSetIfChanged(ref _messages, value);
             
             // subscribe to the new collection
-            if(_messages != null) { _messages.CollectionChanged += OnMessageChanged; }
+            if (_messages != null)
+            {
+                _messages.CollectionChanged += (s, e) =>
+                {
+                    this.RaisePropertyChanged(nameof(ShowNoMessagesText));
+
+                    if (e.Action == NotifyCollectionChangedAction.Add)
+                    {
+                        Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                        {
+                            _messageScrollViewer?.ScrollToEnd();
+                        });
+                    }
+                };
+            }
             
             this.RaisePropertyChanged(nameof(ShowNoMessagesText));
         } 

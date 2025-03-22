@@ -30,7 +30,7 @@
                      HorizontalAlignment="Center"
                      Margin="0,10,0,20"/>
 
-        <ScrollViewer Padding="10" VerticalScrollBarVisibility="Auto" CornerRadius="12">
+        <ScrollViewer x:Name="MessageScrollViewer" Padding="10,0" VerticalScrollBarVisibility="Auto" CornerRadius="12">
             <ItemsControl ItemsSource="{Binding Messages}" IsVisible="{Binding MessagesLoaded}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>

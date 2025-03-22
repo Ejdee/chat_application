@@ -24,14 +24,18 @@ public class MainWindowViewModel : ViewModelBase
 
     public MainWindowViewModel()
     {
-        UsersField = new UsersFieldViewModel(this);
-        CurrentChat = new ChatViewModel("Adam");
-        
+        UsersField = new UsersFieldViewModel(this); 
         _ = InitializeAsync();
     }
 
     private async Task InitializeAsync()
     {
         await UsersField.LoadUsersAsync();
+
+        // Initialize the chat to the first user in the list
+        if (UsersField.Users.Count > 0)
+        {
+            UsersField.SelectedUser = UsersField.Users[0];
+        }
     }
 }
