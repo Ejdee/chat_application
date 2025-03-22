@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using AvaloniaApplication1.ViewModels;
 using Google.Cloud.Firestore;
@@ -11,8 +12,9 @@ public class FirebaseService
 {
     private readonly FirestoreDb _firestoreDb;
     private string? CurrentChatUid { get; set; } = null;
-    private FirestoreChangeListener? _chatListener;
+    private FirestoreChangeListener? _messageListener;
     private FirestoreChangeListener? _userStatusListener;
+    private FirestoreChangeListener? _chatListener;
     private bool _initialChatLoad = true;
 
     public string CurrentUser { get; set; } = string.Empty;
@@ -47,7 +49,7 @@ public class FirebaseService
             // extract the username and create a new UserViewModel for it
             var user = doc.GetValue<string>("Username");
             var active = (doc.GetValue<string>("Status") == "Online") ? true : false;
-            users.Add(new UserViewModel { Name = user, IsActive = active});
+            users.Add(new UserViewModel { Name = user, IsActive = active, DisplayUnreadMessage = false });
         }
 
         return users;
@@ -72,9 +74,6 @@ public class FirebaseService
         // store the chat Uid for future reference
         CurrentChatUid = chatUid;
         
-        //var chatCollection = _firestoreDb.Collection("chat");
-        //var query = chatCollection.WhereEqualTo("ChatUid", chatUid);
-        //var snapshot = await query.GetSnapshotAsync();
         var chatDocRef = _firestoreDb.Collection("chat").Document(chatUid);
         var snapshot = await chatDocRef.GetSnapshotAsync();
 
@@ -142,11 +141,6 @@ public class FirebaseService
         }
     }
 
-    /// <summary>
-    /// Get the Uid of the user based on the username
-    /// </summary>
-    /// <param name="userName">the username</param>
-    /// <returns>Uid or null if unsuccessful</returns>
     private async Task<string?> GetUserUid(string? userName)
     {
         try
@@ -216,15 +210,15 @@ public class FirebaseService
         }
     }
 
-    public void ListenForChatUpdates(Action<MessageViewModel, string> onMessagesUpdated)
+    public void ListenForMessageUpdates(Action<MessageViewModel, string> onMessagesUpdated)
     {
-        _chatListener?.StopAsync();
+        _messageListener?.StopAsync();
         
         // set the flag to avoid multiple chat messages on loading the chat
         _initialChatLoad = true;
         
         var chatCollection = _firestoreDb.Collection("chat").Document(CurrentChatUid).Collection("messages").OrderBy("Timestamp");
-        _chatListener = chatCollection.Listen(snapshot =>
+        _messageListener = chatCollection.Listen(snapshot =>
         {
             // only if the chat is already loaded
             if (_initialChatLoad)
@@ -258,10 +252,10 @@ public class FirebaseService
         try
         {
             // stop the chat listener
-            if (_chatListener != null)
+            if (_messageListener != null)
             {
-                await _chatListener.StopAsync();
-                _chatListener = null;
+                await _messageListener.StopAsync();
+                _messageListener = null;
             }
             
             // stop the user status listener
@@ -312,5 +306,119 @@ public class FirebaseService
                 });
             }
         });
+    }
+
+    public async Task ListenForChatUpdates(Action<string, bool> onNewMessageIndicatorChanged)
+    {
+        if (_chatListener != null)
+        {
+            _chatListener?.StopAsync();
+            _chatListener = null;
+        }
+
+        var chatCollection = _firestoreDb.Collection("chat");
+        
+        // *************** PROCESS THE INDICATOR ON INITIAL LOAD ******************
+        
+        var chatSnapshot = await chatCollection.GetSnapshotAsync();
+        foreach (var chat in chatSnapshot.Documents)
+        {
+            try
+            {
+                var chatId = chat.Id;
+                if (!chatId.Contains(CurrentUser)) continue;
+
+                var partnerId = GetChatPartner(chatId);
+                var partnerUsername = await GetUsernameFromId(partnerId);
+                if (string.IsNullOrEmpty(partnerUsername)) continue;
+
+                var messageIndicator = chat.GetValue<bool>($"NewMessageIndicator.{CurrentUser}");
+                var currentlyReading = chat.GetValue<List<string>>("CurrentlyReading");
+
+                if (currentlyReading.Contains(CurrentUser)) continue;
+
+                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                {
+                    onNewMessageIndicatorChanged(partnerUsername, messageIndicator);
+                });
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Error sending message indicator: " + e);
+            }
+        }
+        
+        // *************** PROCESS THE INDICATORS IN REAL TIME ******************
+
+        _chatListener = chatCollection.Listen(snapshot =>
+        {
+            foreach (var change in snapshot.Changes)
+            {
+                try
+                {
+                    if (change.Document.Exists)
+                    {
+                        var chatDoc = change.Document;
+                        var chatId = chatDoc.Id;
+
+                        // filter the chats that contain the current user
+                        if (!chatId.Contains(CurrentUser)) { continue; }
+
+                        var partnerId = GetChatPartner(chatId);
+
+                        Task.Run(async () =>
+                        {
+                            try
+                            {
+                                // get the new message indicator
+                                var messageIndicator = chatDoc.GetValue<bool>($"NewMessageIndicator.{CurrentUser}");
+                                var currentlyReading = chatDoc.GetValue<List<string>>("CurrentlyReading");
+
+                                if (currentlyReading.Contains(CurrentUser)) { return; }
+
+                                var partnerUsername = await GetUsernameFromId(partnerId);
+                                if (string.IsNullOrEmpty(partnerUsername)) { return; }
+
+                                Avalonia.Threading.Dispatcher.UIThread.Post(() =>
+                                {
+                                    onNewMessageIndicatorChanged(partnerUsername, messageIndicator);
+                                });
+                            }
+                            catch (Exception e)
+                            {
+                                Console.WriteLine($"Error sending message indicator: {e}");
+                            }
+                        });
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error sending message indicator: {e}");
+                }
+            }
+        });
+    }
+
+    private async Task<string?> GetUsernameFromId(string id)
+    {
+        var userDoc = _firestoreDb.Collection("users").Document(id);
+        var snapshot = await userDoc.GetSnapshotAsync();
+        
+        if (!snapshot.Exists) return null;
+        
+        var username = snapshot.GetValue<string>("Username");
+        
+        if (string.IsNullOrEmpty(username))
+        {
+            throw new Exception("Username is empty.");
+        }
+
+        return username;
+    }
+
+    private string GetChatPartner(string chatId)
+    {
+        var userIds = chatId.Split("_");
+        return userIds[0] == CurrentUser ? userIds[1] : userIds[0];
     }
 }

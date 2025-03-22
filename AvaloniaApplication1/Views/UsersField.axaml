@@ -52,7 +52,7 @@
                     <Grid>
                       <Ellipse Width="10" Height="10"
                                Fill="Red"
-                               IsVisible="{Binding HasUnreadMessage}"
+                               IsVisible="{Binding DisplayUnreadMessage}"
                                VerticalAlignment="Top"
                                HorizontalAlignment="Right"
                                 Margin="0,0,0,0"/>

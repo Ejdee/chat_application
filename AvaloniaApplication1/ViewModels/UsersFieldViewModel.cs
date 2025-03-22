@@ -41,6 +41,7 @@ public class UsersFieldViewModel : ViewModelBase
         SortUsersByActivity();
         
         _firebaseService.ListenForUserStatus(OnUserUpdated);
+        await _firebaseService.ListenForChatUpdates(OnNewMessageIndicatorChanged);
         IsLoaded = true;
     }
 
@@ -102,6 +103,15 @@ public class UsersFieldViewModel : ViewModelBase
         }
     }
 
+    private void OnNewMessageIndicatorChanged(string username, bool displayIndicator)
+    {
+        var user = Users.FirstOrDefault(u => u.Name == username);
+        if (user != null)
+        {
+            user.DisplayUnreadMessage = displayIndicator;
+        }
+    }
+
     public UserViewModel? SelectedUser
     {
         get => _selectedUser;
@@ -138,7 +148,7 @@ public class UsersFieldViewModel : ViewModelBase
                 
                 // indicate, that the messages are loaded
                 _mainWindowViewModel.CurrentChat.MessagesLoaded = true;
-                _firebaseService.ListenForChatUpdates(_mainWindowViewModel.CurrentChat.OnMessageUpdated);
+                _firebaseService.ListenForMessageUpdates(_mainWindowViewModel.CurrentChat.OnMessageUpdated);
             }
         }
         catch (Exception e)
@@ -158,7 +168,7 @@ public class UsersFieldViewModel : ViewModelBase
 public class UserViewModel : ViewModelBase
 {
     private string? _name;
-    private bool _hasUnreadMessage;
+    private bool _displayUnreadMessage;
     private Random _random = new();
     
     // List of colors to use for user avatars
@@ -168,10 +178,10 @@ public class UserViewModel : ViewModelBase
         "#1abc9c", "#e67e22", "#34495e", "#95a5a6", "#d35400"
     };
 
-    public bool HasUnreadMessage
+    public bool DisplayUnreadMessage
     {
-        get => _hasUnreadMessage;
-        set => this.RaiseAndSetIfChanged(ref _hasUnreadMessage, value);
+        get => _displayUnreadMessage;
+        set => this.RaiseAndSetIfChanged(ref _displayUnreadMessage, value);
     }
     
     public string? Name
