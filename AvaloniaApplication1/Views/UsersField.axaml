@@ -48,31 +48,40 @@
                         Padding="10"
                         CornerRadius="8"
                         Background="#36454F">
-                  <Grid ColumnDefinitions="Auto,*">
-                    <Border Width="40"
-                            Height="40"
-                            CornerRadius="20"
-                            Background="{Binding AvatarColor}">
-                      <TextBlock Text="{Binding Initials}"
-                                 HorizontalAlignment="Center"
-                                 VerticalAlignment="Center"
-                                 FontWeight="Bold"
-                                 Foreground="Black"/>
-                    </Border>
-                    <StackPanel Grid.Column="1" Margin="10,0,0,0">
-                      <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
-                      <Grid ColumnDefinitions="Auto,*">
-                        <Ellipse Width="8"
-                                 Height="8"
-                                 Fill="{Binding StatusColor}"
-                                 VerticalAlignment="Center"/>
-                        <TextBlock Grid.Column="1"
-                                   Text="{Binding Status}"
-                                   FontSize="12"
-                                   Opacity="0.7"
-                                   Margin="5,0,0,0"/>
-                      </Grid>
-                    </StackPanel>
+                  
+                    <Grid>
+                      <Ellipse Width="10" Height="10"
+                               Fill="Red"
+                               IsVisible="{Binding HasUnreadMessage}"
+                               VerticalAlignment="Top"
+                               HorizontalAlignment="Right"
+                                Margin="0,0,0,0"/>
+                    <Grid ColumnDefinitions="Auto,*">
+                      <Border Width="40"
+                              Height="40"
+                              CornerRadius="20"
+                              Background="{Binding AvatarColor}">
+                        <TextBlock Text="{Binding Initials}"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"
+                                   FontWeight="Bold"
+                                   Foreground="Black"/>
+                      </Border>
+                      <StackPanel Grid.Column="1" Margin="10,0,0,0">
+                        <TextBlock Text="{Binding Name}" FontWeight="SemiBold"/>
+                        <Grid ColumnDefinitions="Auto,*">
+                          <Ellipse Width="8"
+                                   Height="8"
+                                   Fill="{Binding StatusColor}"
+                                   VerticalAlignment="Center"/>
+                          <TextBlock Grid.Column="1"
+                                     Text="{Binding Status}"
+                                     FontSize="12"
+                                     Opacity="0.7"
+                                     Margin="5,0,0,0"/>
+                        </Grid>
+                      </StackPanel>
+                    </Grid>
                   </Grid>
                 </Border>
               </DataTemplate>

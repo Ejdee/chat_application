@@ -7,6 +7,7 @@ using Avalonia.Markup.Xaml.Converters;
 using Avalonia.Metadata;
 using AvaloniaApplication1.ViewModels;
 using Google.Cloud.Firestore;
+using Google.Protobuf.WellKnownTypes;
 
 namespace AvaloniaApplication1.Services;
 
@@ -68,6 +69,9 @@ public class FirebaseService
             CurrentUser + "_" + userUid : 
             userUid + "_" + CurrentUser;
         
+        // clear the user from the "currentlyReading" list of the old chat, since he is opening a new one
+        await ClearTheCurrentlyReadingAsync();
+        
         // store the chat Uid for future reference
         CurrentChatUid = chatUid;
         
@@ -78,6 +82,12 @@ public class FirebaseService
         if (snapshot.Documents.Count > 0)
         {
             var chatDocument = snapshot.Documents[0];
+            
+            // update the currently reading list with adding the current user (that opened it)
+            await chatDocument.Reference.UpdateAsync("CurrentlyReading", FieldValue.ArrayUnion(CurrentUser));
+            Console.WriteLine("Currently reading set: " + CurrentUser);
+            
+            
             var messages = chatDocument.Reference.Collection("messages");
             var messagesSnapshot = await messages.OrderBy("Timestamp").GetSnapshotAsync();
 
@@ -96,14 +106,38 @@ public class FirebaseService
         {
             // if the chat doesn't exit, create one
             var chatRefDoc = chatCollection.Document();
+            var userIds = chatUid.Split("_");
             await chatRefDoc.SetAsync(new
             {
                 ChatUid = chatUid,
                 CreatedAt = DateTime.UtcNow,
+                CurrentlyReading = new List<string>(),
+                NewMessageIndicator = new Dictionary<string, bool>
+                {
+                    { userIds[0], false },
+                    { userIds[1], false }
+                }
             });
         }
 
         return chatMessagesResult;
+    }
+
+    public async Task ClearTheCurrentlyReadingAsync()
+    {
+        var chatCollection = _firestoreDb.Collection("chat");
+        Console.WriteLine("Current ChatUID: " + CurrentChatUid);
+        if (CurrentChatUid != null)
+        {
+            var query = chatCollection.WhereEqualTo("ChatUid", CurrentChatUid);
+            var snapshotChat = await query.GetSnapshotAsync();
+            if (snapshotChat.Documents.Count > 0)
+            {
+                var chatDocument = snapshotChat.Documents[0];
+                await chatDocument.Reference.UpdateAsync("CurrentlyReading", FieldValue.ArrayRemove(CurrentUser));
+                Console.WriteLine("Currently reading removed: " + CurrentUser);
+            }
+        }
     }
 
     /// <summary>
@@ -189,7 +223,18 @@ public class FirebaseService
         try
         {
             // stop the chat listener
-            _chatListener?.StopAsync();
+            if (_chatListener != null)
+            {
+                await _chatListener.StopAsync();
+                _chatListener = null;
+            }
+            
+            // stop the user status listener
+            if (_userStatusListener != null)
+            {
+                await _userStatusListener.StopAsync();
+                _userStatusListener = null;
+            }
 
             if (!string.IsNullOrEmpty(CurrentUser))
             {

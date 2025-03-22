@@ -4,6 +4,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core;
 using Avalonia.Data.Core.Plugins;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
 using AvaloniaApplication1.Services;
@@ -43,7 +44,7 @@ public partial class App : Application
             desktop.MainWindow = authView;
             authView.DataContext = new AuthViewModel(authView);
             
-            desktop.Exit += OnExit;
+    //        desktop.Exit += OnExit;
         }
 
         base.OnFrameworkInitializationCompleted();
@@ -61,13 +62,34 @@ public partial class App : Application
             BindingPlugins.DataValidators.Remove(plugin);
         }
     }
-    
-    private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
-    {
-        var firebaseService = ServiceProvider?.GetService<FirebaseService>();
-        if (firebaseService != null)
-        {
-            _ = firebaseService.LogOutUserAsync();
-        }
-    }
+
+    //private async Task OnExitAsync()
+    //{
+    //    var firebaseService = ServiceProvider?.GetService<FirebaseService>();
+    //    if (firebaseService != null)
+    //    {
+    //        try
+    //        {
+    //            Console.WriteLine("logging out user");
+    //            await firebaseService.LogOutUserAsync();
+    //            Console.WriteLine("Logged out");
+    //            
+    //            Console.WriteLine("Clearing the currently reading book");
+    //            await firebaseService.ClearTheCurrentlyReadingAsync();
+    //            Console.WriteLine("Clearing the currently reading book done");
+    //        }
+    //        catch (Exception e)
+    //        {
+    //            Console.WriteLine("Error on exiting the program: " + e);
+    //        }
+    //    }
+    //}
+    //
+    //private void OnExit(object? sender, ControlledApplicationLifetimeExitEventArgs e)
+    //{
+    //    Task.Run(async () =>
+    //    {
+    //        await OnExitAsync();
+    //    });
+    //}
 }

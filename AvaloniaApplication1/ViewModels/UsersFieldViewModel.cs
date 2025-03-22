@@ -158,6 +158,8 @@ public class UsersFieldViewModel : ViewModelBase
 public class UserViewModel : ViewModelBase
 {
     private string? _name;
+    private bool _hasUnreadMessage;
+    private Random _random = new();
     
     // List of colors to use for user avatars
     private static readonly List<string> Colors = new()
@@ -166,7 +168,11 @@ public class UserViewModel : ViewModelBase
         "#1abc9c", "#e67e22", "#34495e", "#95a5a6", "#d35400"
     };
 
-    private Random _random = new();
+    public bool HasUnreadMessage
+    {
+        get => _hasUnreadMessage;
+        set => this.RaiseAndSetIfChanged(ref _hasUnreadMessage, value);
+    }
     
     public string? Name
     {
