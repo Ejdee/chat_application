@@ -1,0 +1,21 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ChatApplication.App"
+             xmlns:local="using:ChatApplication"
+             xmlns:converters="clr-namespace:ChatApplication.Converters"
+             RequestedThemeVariant="Default">
+             <!-- "Default" ThemeVariant follows system theme variant. "Dark" or "Light" are other available options. -->
+
+             <Application.Resources>
+                 <converters:BoolToMessageColorConverter x:Key="BoolToMessageColorConverter" />
+                 <converters:BoolToAlignmentConverter x:Key="BoolToAlignmentConverter" />
+                 <converters:EmptyCollectionToBoolConverter x:Key="EmptyCollectionToBoolConverter" />
+             </Application.Resources>
+             <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+  
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+</Application>

@@ -1,0 +1,21 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ChatApplication.ViewModels"
+        xmlns:views="using:ChatApplication.Views"
+        x:Class="ChatApplication.Views.AuthView"
+        x:DataType="vm:AuthViewModel"
+        Width="400" Height="400"
+        WindowStartupLocation="CenterScreen"
+        Title="Auth">
+
+    <ContentControl Content="{Binding CurrentViewModel}">
+        <ContentControl.DataTemplates>
+            <DataTemplate DataType="vm:LoginViewModel">
+                <views:LoginView />
+            </DataTemplate>
+            <DataTemplate DataType="vm:RegistrationViewModel">
+                <views:RegistrationView />
+            </DataTemplate>
+        </ContentControl.DataTemplates>
+    </ContentControl>
+</Window>
