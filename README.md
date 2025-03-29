@@ -22,11 +22,26 @@ The application follows the MVVM (Model-View-ViewModel) design pattern. However,
 - Firebase Realtime Database
 - ReactiveUI
 
-### Showcase
+## Showcase
+
+### Login And Registration
 ![LoginRegister](images/loginregister.png)
-![Chat](images/showcase.png)
+
+### User status tracking (online/offline)
+![UserStatus](gifs/activityShowcase.GIF)
+![UserStatusOffline](gifs/logout.GIF)
+
+### Messaging
+![Messaging](gifs/autoScrollerShowcase.GIF)
+
+### New Message Indicator
+![MessageSending](gifs/messageIndicator.GIF)
+
 
 ### Future improvements
-- Implementing models
+- Separating models to further improve the architecture
 - Group chat
 - Search users
+
+### License
+This project is licensed under the GNU General Public License v3.0. See the [LICENSE](LICENSE) file for details.
