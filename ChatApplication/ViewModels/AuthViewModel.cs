@@ -8,9 +8,9 @@ namespace ChatApplication.ViewModels;
 public class AuthViewModel : ViewModelBase
 {
     private ViewModelBase _currentViewModel;
-    private LoginViewModel _loginViewModel;
-    private RegistrationViewModel _registrationViewModel;
-    private Window _window;
+    private readonly LoginViewModel _loginViewModel;
+    private readonly RegistrationViewModel _registrationViewModel;
+    private readonly Window _window;
 
     public ViewModelBase CurrentViewModel
     {

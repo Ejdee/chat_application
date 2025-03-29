@@ -8,8 +8,8 @@ public partial class ChatView : UserControl
     public ChatView()
     {
         InitializeComponent();
-        this.AttachedToVisualTree += (s, e) => ConnectScrollViewer();
-        this.DataContextChanged += (s, e) => ConnectScrollViewer();
+        this.AttachedToVisualTree += (_, _) => ConnectScrollViewer();
+        this.DataContextChanged += (_, _) => ConnectScrollViewer();
     }
 
     private void ConnectScrollViewer()

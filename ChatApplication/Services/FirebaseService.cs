@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Runtime.InteropServices.ComTypes;
 using System.Threading.Tasks;
 using ChatApplication.ViewModels;
 using Google.Cloud.Firestore;
@@ -11,7 +10,7 @@ namespace ChatApplication.Services;
 public class FirebaseService
 {
     private readonly FirestoreDb _firestoreDb;
-    private string? CurrentChatUid { get; set; } = null;
+    private string? CurrentChatUid { get; set; }
     private FirestoreChangeListener? _messageListener;
     private FirestoreChangeListener? _userStatusListener;
     private FirestoreChangeListener? _chatListener;
@@ -48,7 +47,7 @@ public class FirebaseService
             
             // extract the username and create a new UserViewModel for it
             var user = doc.GetValue<string>("Username");
-            var active = (doc.GetValue<string>("Status") == "Online") ? true : false;
+            var active = (doc.GetValue<string>("Status") == "Online");
             users.Add(new UserViewModel { Name = user, IsActive = active, DisplayUnreadMessage = false });
         }
 

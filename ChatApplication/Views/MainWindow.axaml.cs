@@ -8,13 +8,13 @@ namespace ChatApplication.Views;
 
 public partial class MainWindow : Window
 {
-    private bool _isClosing = false; 
+    private bool _isClosing; 
     
     public MainWindow()
     {
         InitializeComponent();
         DataContext=  new MainWindowViewModel();
-        this.Closing += MainWindowClosing;
+        Closing += MainWindowClosing;
     }
 
     private async void MainWindowClosing(object? sender, WindowClosingEventArgs e)

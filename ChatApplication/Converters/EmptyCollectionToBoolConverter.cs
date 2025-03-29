@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using System.Text;
 using Avalonia.Data.Converters;
 
 namespace ChatApplication.Converters;
@@ -17,7 +16,7 @@ public class EmptyCollectionToBoolConverter : IValueConverter
         return false;
     }
 
-    public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
     {
         throw new NotImplementedException();
     }

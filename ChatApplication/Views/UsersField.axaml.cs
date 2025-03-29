@@ -1,6 +1,5 @@
 using Avalonia.Controls;
 using Avalonia.Markup.Xaml;
-using ChatApplication.ViewModels;
 
 namespace ChatApplication.Views;
 

@@ -2,7 +2,6 @@ using System;
 using System.Threading.Tasks;
 using Firebase.Auth;
 using Firebase.Auth.Providers;
-using Google.Api;
 using Google.Cloud.Firestore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -51,7 +50,7 @@ public class FirebaseAuthService
 
             return (true, userCredential.User.Uid);
         }
-        catch (Firebase.Auth.FirebaseAuthException ae)
+        catch (FirebaseAuthException ae)
         {
             switch (ae.Reason)
             {
@@ -107,7 +106,7 @@ public class FirebaseAuthService
                 return (false, "User not found.");
             }
         }
-        catch (Firebase.Auth.FirebaseAuthException ae)
+        catch (FirebaseAuthException ae)
         {
             switch (ae.Reason)
             {

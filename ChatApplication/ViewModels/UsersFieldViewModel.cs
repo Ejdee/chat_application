@@ -4,7 +4,6 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using ChatApplication.Services;
-using Firebase.Auth;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
 

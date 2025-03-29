@@ -51,7 +51,7 @@ public class ChatViewModel : ViewModelBase
             // subscribe to the new collection
             if (_messages != null)
             {
-                _messages.CollectionChanged += (s, e) =>
+                _messages.CollectionChanged += (_, e) =>
                 {
                     this.RaisePropertyChanged(nameof(ShowNoMessagesText));
 
@@ -146,7 +146,7 @@ public class MessageViewModel : ViewModelBase
     private string _content;
     private string _timestamp;
     private bool _isOwnMessage;
-    
+
     public string Content
     {
         get => _content;

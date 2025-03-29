@@ -7,7 +7,7 @@ namespace ChatApplication.Converters;
 
 public class BoolToMessageColorConverter : IValueConverter
 {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
                 // if the message is from the current user, use a green color
                 // if the message is from the other user, use a differet color
@@ -21,7 +21,7 @@ public class BoolToMessageColorConverter : IValueConverter
                 throw new Exception("Color is null");
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
                 throw new NotImplementedException();
         }
@@ -29,7 +29,7 @@ public class BoolToMessageColorConverter : IValueConverter
 
 public class BoolToAlignmentConverter : IValueConverter
 {
-        public object? Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
                 // if the message is from the current user, align it to the right
                 // if the message is from the other user, align it to the left
@@ -43,7 +43,7 @@ public class BoolToAlignmentConverter : IValueConverter
                 throw new Exception("Alignment is null");
         }
 
-        public object? ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
+        public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture)
         {
                 throw new NotImplementedException();
         }

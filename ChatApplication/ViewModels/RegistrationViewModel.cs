@@ -1,8 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Controls;
-using ChatApplication.Views;
 using ChatApplication.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -67,7 +65,7 @@ public class RegistrationViewModel : ViewModelBase
         try
         {
             var success = await _firebaseAuthService.RegisterUserAsync(Email, Password, Username);
-            if (success.Success == true)
+            if (success.Success)
             {
                 // go to the main window
                 _authViewModel.GoToMain();
@@ -82,7 +80,6 @@ public class RegistrationViewModel : ViewModelBase
         catch (Exception e)
         {
             ErrorMessage = e.Message;
-            return;
         }
     }
 }

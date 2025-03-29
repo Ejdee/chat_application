@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Avalonia.Controls;
-using ChatApplication.Views;
-using CommunityToolkit.Mvvm.ComponentModel;
 using ReactiveUI;
 
 namespace ChatApplication.ViewModels;

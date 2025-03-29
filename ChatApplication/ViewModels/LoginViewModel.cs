@@ -1,9 +1,6 @@
 using System;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using Avalonia.Controls;
-using Avalonia.Threading;
-using ChatApplication.Views;
 using ChatApplication.Services;
 using Microsoft.Extensions.DependencyInjection;
 using ReactiveUI;
@@ -68,7 +65,7 @@ public class LoginViewModel : ViewModelBase
 
             // login
             var success = await _firebaseAuthService.LoginUserAsync(Email, Password);
-            if (success.Success == true)
+            if (success.Success)
             {
                 Console.WriteLine("logged in");
                 // go to the main window
