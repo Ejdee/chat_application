@@ -20,7 +20,7 @@ public class FirebaseService
 
     public FirebaseService()
     {
-        _firestoreDb = FirestoreDb.Create("Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID")");
+        _firestoreDb = FirestoreDb.Create(Environment.GetEnvironmentVariable("FIREBASE_PROJECT_ID"));
         Console.WriteLine("Connected to the database.");
     }
 
