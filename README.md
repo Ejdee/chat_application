@@ -28,13 +28,17 @@ The application follows the MVVM (Model-View-ViewModel) design pattern. However,
 ![LoginRegister](images/loginregister.png)
 
 ### User status tracking (online/offline)
-![Demo1](https://i.imgur.com/nzK6gIq.gif)
+
+![Demo1](https://i.imgur.com/PrYn7QC.gif)
+
 ![Demo2](https://i.imgur.com/jHyawxX.gif)
 
 ### Messaging
-![Demo3](https://i.imgur.com/JrvUyez.gif)
+
+![Demo3](https://i.imgur.com/2a6LHV7.gif)
 
 ### New Message Indicator
+
 ![Demo4](https://i.imgur.com/ACkNbRX.gif)
 
 ### Future improvements
